@@ -1,0 +1,14 @@
+# Sensei MCP Server - Development Dependencies
+# Main dependencies are in pyproject.toml
+
+# Core (for reference)
+fastmcp>=0.2.0
+pydantic>=2.0.0
+
+# Development
+pytest>=7.0.0
+pytest-cov>=4.0.0
+build>=0.10.0
+twine>=4.0.0
+black>=23.0.0
+isort>=5.12.0

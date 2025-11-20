@@ -1,0 +1,38 @@
+[project]
+name = "sensei-mcp"
+version = "0.1.0"
+description = "Engineering standards mentor - Active context injection for 50+ file types with session memory"
+authors = [{name = "amarodeabreu"}]
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.2.0",
+    "pydantic>=2.0.0",
+]
+keywords = [
+    "mcp",
+    "mcp-server",
+    "claude",
+    "engineering-standards",
+    "code-quality",
+    "sensei",
+]
+
+[project.urls]
+Homepage = "https://github.com/amarodeabreu/sensei-mcp"
+Repository = "https://github.com/amarodeabreu/sensei-mcp"
+Issues = "https://github.com/amarodeabreu/sensei-mcp/issues"
+
+[project.scripts]
+sensei-mcp = "sensei_mcp.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sensei_mcp"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"src/sensei_mcp/core-directives.md" = "sensei_mcp/core-directives.md"
