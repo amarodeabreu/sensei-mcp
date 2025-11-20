@@ -1,6 +1,9 @@
 # Sensei MCP 🥋
 
+![PyPI](https://img.shields.io/pypi/v/sensei-mcp)
+
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
+
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
 > Your engineering standards mentor - Active context injection for 50+ file types with session memory
