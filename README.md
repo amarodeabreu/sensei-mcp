@@ -6,7 +6,9 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-> Your engineering standards mentor - Active context injection for 50+ file types with session memory
+> Multi-persona engineering mentor with 22 specialized AI skills orchestrating collaborative guidance
+
+**NEW in v0.3.0:** Sensei now features a **Skill Orchestrator** with 22 specialized personas (Snarky Senior Engineer, Pragmatic Architect, Security Sentinel, FinOps Optimizer, and 18 more) that collaborate to provide nuanced, multi-perspective engineering guidance.
 
 Sensei transforms your engineering standards from passive documentation into an active mentor that injects relevant guidelines **before** Claude reasons, maintaining session memory of architectural decisions.
 
@@ -199,6 +201,24 @@ Claude: [writes code that follows standards]
 
 ## ⚡ Key Features
 
+### v0.3.0 - Multi-Persona Orchestrator 🎭
+
+- 🎭 **22 Specialized Personas** - Skill Orchestrator coordinates expert perspectives:
+  - **Core Skills:** Snarky Senior Engineer, Pragmatic Architect, Legacy Archaeologist
+  - **Specialized Skills:** Security Sentinel, FinOps Optimizer, Performance Engineer, Product Engineering Lead, API Architect
+  - **Operations:** Incident Commander, SRE, Executive Liaison, Compliance Guardian
+  - **Plus 10+ more:** DevX Advocate, Tech Debt Wrangler, Data Platform Engineer, Frontend Performance, Staff+ Mentor, etc.
+- 🧠 **Context Detection** - Intelligently routes queries to relevant personas (CRISIS, SECURITY, POLITICAL, ARCHITECTURAL, COST, TEAM, TECHNICAL)
+- 🤝 **Collaborative Synthesis** - Multiple perspectives with conflict resolution and consensus building
+- 📊 **Consultation Tracking** - Session memory records which personas were consulted and why
+- ⚡ **Multiple Modes:**
+  - `orchestrated` (default): 2-5 persona collaboration
+  - `quick`: Just Snarky Senior Engineer for fast answers
+  - `crisis`: Emergency team (Incident Commander, SRE, Executive Liaison)
+  - `standards`: Legacy single-voice mode for backwards compatibility
+
+### Core Features (v0.2.x)
+
 - 🎯 **Context-aware loading** - Only 5-15% of rulebook per request (87.5% token savings)
 - 🧠 **Session memory** - Remembers architectural decisions across conversations
 - 🤝 **Team Sync** - Share decisions and rules via `.sensei` folder in your repo
@@ -253,11 +273,76 @@ package.json, Gemfile, **Cargo.toml**, **go.mod**, requirements.txt, **Pipfile**
 
 ## 🛠️ Usage
 
-Sensei provides 7 MCP tools:
+Sensei provides **10 MCP tools** (3 new in v0.3.0):
 
-### 1. get_engineering_context
+### NEW v0.3.0 Tools - Multi-Persona Orchestrator
+
+#### 1. get_engineering_guidance (NEW - Primary Tool)
+
+Get collaborative multi-persona guidance on any engineering question.
+
+```python
+# Example: Architecture decision
+get_engineering_guidance(
+  query="Should we use microservices or a monolith for our SaaS app?",
+  mode="orchestrated",  # default: auto-selects 2-5 relevant personas
+  session_id="saas-backend",
+  output_format="standard"
+)
+# Returns: Synthesis from Pragmatic Architect, Snarky Senior Engineer,
+#          Product Engineering Lead with consensus and tensions
+
+# Quick mode - fast answer from just Snarky
+get_engineering_guidance(
+  query="How do I fix this API bug?",
+  mode="quick"  # Only Snarky Senior Engineer responds
+)
+
+# Crisis mode - emergency team
+get_engineering_guidance(
+  query="Production database is down!",
+  mode="crisis"  # Incident Commander, SRE, Executive Liaison
+)
+
+# Request specific personas
+get_engineering_guidance(
+  query="How do we reduce our AWS bill?",
+  specific_personas=["finops-optimizer", "pragmatic-architect"]
+)
+```
+
+#### 2. consult_skill (NEW)
+
+Consult a single persona directly for targeted expertise.
+
+```python
+consult_skill(
+  skill_name="security-sentinel",
+  query="Review this authentication implementation for vulnerabilities",
+  session_id="saas-backend"
+)
+```
+
+#### 3. list_available_skills (NEW)
+
+Discover all 22 available personas organized by category.
+
+```python
+# List all personas
+list_available_skills()
+
+# List by category
+list_available_skills(category="operations")  # SRE, Incident Commander, etc.
+list_available_skills(category="specialized")  # Security, FinOps, Performance, etc.
+```
+
+### Core Tools (v0.2.x) - Still Supported
+
+#### 4. get_engineering_context (Legacy)
 
 Smart context injection - loads relevant standards based on files and operation.
+
+**Note:** In v0.3.0, this is now called via `get_engineering_guidance(..., mode="standards")` for backwards compatibility.
 
 ```python
 # Example: Working on payment API
@@ -270,7 +355,7 @@ get_engineering_context(
 # Returns: API contracts, security, multi-tenancy, idempotency standards
 ```
 
-### 2. record_decision
+#### 5. record_decision
 
 Save architectural decisions to prevent re-litigation.
 
@@ -283,7 +368,7 @@ record_decision(
 )
 ```
 
-### 3. validate_against_standards
+#### 6. validate_against_standards
 
 Pre-implementation validation check.
 
@@ -295,7 +380,7 @@ validate_against_standards(
 )
 ```
 
-### 4. get_session_summary
+#### 7. get_session_summary
 
 Review all decisions and constraints for current project.
 
@@ -303,7 +388,7 @@ Review all decisions and constraints for current project.
 get_session_summary(session_id="saas-backend")
 ```
 
-### 5. list_sessions
+#### 8. list_sessions
 
 Manage multiple projects with separate session states.
 
@@ -311,7 +396,7 @@ Manage multiple projects with separate session states.
 list_sessions()
 ```
 
-### 6. query_specific_standard
+#### 9. query_specific_standard
 
 Direct access to specific rulebook sections.
 
@@ -322,7 +407,7 @@ query_specific_standard(
 )
 ```
 
-### 7. check_consistency
+#### 10. check_consistency
 
 Validate proposed changes against past decisions.
 
@@ -333,7 +418,7 @@ check_consistency(
 )
 ```
 
-### 8. analyze_changes
+#### 11. analyze_changes
 
 Automatically infer context from staged git changes.
 
@@ -389,10 +474,50 @@ This allows you to commit your engineering memory to Git!
 
 ## 💡 Example Workflows
 
-### Starting a New Feature
+### Architecture Decision (v0.3.0 Multi-Persona)
 
 ```python
-# 1. Get context for the feature
+# 1. Get multi-persona guidance on architecture
+result = get_engineering_guidance(
+  query="Should we migrate from a monolith to microservices? We have 5 engineers and 10K users.",
+  mode="orchestrated",  # Auto-selects relevant personas
+  session_id="saas-backend"
+)
+# Personas consulted: Pragmatic Architect, Snarky Senior Engineer, Product Engineering Lead
+# Synthesis includes: Consensus points, tensions/trade-offs, recommendation
+
+# 2. Consult specific expert for follow-up
+consult_skill(
+  skill_name="finops-optimizer",
+  query="What's the cost impact of microservices vs monolith?",
+  session_id="saas-backend"
+)
+
+# 3. Record the decision
+record_decision(
+  category="architecture",
+  description="Stay monolith for now, plan modular architecture",
+  rationale="Team size and user scale don't justify microservices complexity yet",
+  session_id="saas-backend"
+)
+```
+
+### Production Incident (Crisis Mode)
+
+```python
+# Crisis mode activates emergency response team
+get_engineering_guidance(
+  query="Production database has 10K connections and is timing out!",
+  mode="crisis",  # Incident Commander, SRE, Executive Liaison
+  session_id="saas-backend"
+)
+# Returns: Immediate triage steps, communication plan, root cause analysis
+```
+
+### Starting a New Feature (v0.2.x Legacy Mode)
+
+```python
+# 1. Get context for the feature (legacy standards mode)
 get_engineering_context(
   operation="CREATE",
   file_paths=["api/webhooks.py"],

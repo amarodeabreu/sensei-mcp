@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 class ContextType(Enum):
     """Types of engineering contexts mapped to rulebook sections"""
@@ -76,6 +76,19 @@ class Decision:
 
 
 @dataclass
+class Consultation:
+    """Record of a persona consultation"""
+    id: str
+    timestamp: str
+    query: str
+    mode: str  # orchestrated, quick, standards
+    personas_consulted: List[str]
+    context: str  # CRISIS, SECURITY, etc.
+    synthesis: str
+    decision_id: Optional[str] = None  # Link to decision if made
+
+
+@dataclass
 class SessionState:
     """Current session's accumulated context"""
     session_id: str
@@ -83,4 +96,5 @@ class SessionState:
     decisions: List[Decision]
     active_constraints: List[str]
     patterns_agreed: List[str]
+    consultations: List[Consultation]
     last_updated: str

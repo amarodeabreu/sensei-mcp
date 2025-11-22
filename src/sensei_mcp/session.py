@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 from dataclasses import asdict
 
-from .models import SessionState, Decision
+from .models import SessionState, Decision, Consultation
 
 class SessionManager:
     """Manages session state persistence"""
@@ -43,6 +43,7 @@ class SessionManager:
                     decisions=[Decision(**d) for d in data['decisions']],
                     active_constraints=data['active_constraints'],
                     patterns_agreed=data['patterns_agreed'],
+                    consultations=[Consultation(**c) for c in data.get('consultations', [])],
                     last_updated=data['last_updated']
                 )
         else:
@@ -52,6 +53,7 @@ class SessionManager:
                 decisions=[],
                 active_constraints=[],
                 patterns_agreed=[],
+                consultations=[],
                 last_updated=datetime.now().isoformat()
             )
 
@@ -83,6 +85,7 @@ class SessionManager:
                 'decisions': [asdict(d) for d in self.current_session.decisions],
                 'active_constraints': self.current_session.active_constraints,
                 'patterns_agreed': self.current_session.patterns_agreed,
+                'consultations': [asdict(c) for c in self.current_session.consultations],
                 'last_updated': self.current_session.last_updated
             }
             json.dump(data, f, indent=2)
@@ -129,3 +132,32 @@ class SessionManager:
         self.current_session.decisions.append(decision)
         self.save_session()
         return decision
+
+    def add_consultation(
+        self,
+        query: str,
+        mode: str,
+        personas_consulted: List[str],
+        context: str,
+        synthesis: str,
+        decision_id: Optional[str] = None,
+        project_root: Optional[str] = None
+    ):
+        """Record a persona consultation"""
+        if not self.current_session:
+            self.get_or_create_session(project_root=project_root)
+
+        consultation = Consultation(
+            id=f"consult_{len(self.current_session.consultations) + 1}",
+            timestamp=datetime.now().isoformat(),
+            query=query,
+            mode=mode,
+            personas_consulted=personas_consulted,
+            context=context,
+            synthesis=synthesis,
+            decision_id=decision_id
+        )
+
+        self.current_session.consultations.append(consultation)
+        self.save_session()
+        return consultation

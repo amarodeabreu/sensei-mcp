@@ -17,6 +17,8 @@ from mcp.server.fastmcp import FastMCP
 from .models import ContextType
 from .session import SessionManager
 from .engine import ContextInferenceEngine, RulebookLoader
+from .personas.registry import PersonaRegistry
+from .orchestrator import SkillOrchestrator
 
 # Initialize MCP server
 mcp = FastMCP("sensei")
@@ -25,10 +27,15 @@ mcp = FastMCP("sensei")
 SERVER_DIR = Path(__file__).parent
 DIRECTIVES_PATH = SERVER_DIR / "core-directives.md"
 SESSION_DIR = Path.home() / ".sensei" / "sessions"
+SKILLS_DIR = SERVER_DIR / "personas" / "skills"
 
 # Initialize managers
 session_mgr = SessionManager(SESSION_DIR)
 rulebook = RulebookLoader(DIRECTIVES_PATH)
+
+# Initialize orchestrator (v0.3.0 - Multi-persona mode)
+persona_registry = PersonaRegistry(SKILLS_DIR)
+orchestrator = SkillOrchestrator(persona_registry)
 
 
 @mcp.tool()
@@ -424,6 +431,206 @@ def analyze_changes(project_root: str) -> str:
         
     except Exception as e:
         return f"❌ Error running git analysis: {str(e)}"
+
+
+# ============================================================================
+# v0.3.0 NEW TOOLS - Multi-Persona Orchestration
+# ============================================================================
+
+@mcp.tool()
+def get_engineering_guidance(
+    query: str,
+    mode: str = "orchestrated",
+    session_id: str = "default",
+    project_root: str = None,
+    specific_personas: List[str] = None,
+    output_format: str = "standard"
+) -> str:
+    """
+    Get engineering guidance via multi-persona orchestration (DEFAULT in v0.3.0).
+
+    This is the NEW primary tool for getting engineering guidance.
+    The Skill Orchestrator coordinates 21 specialized personas to provide
+    holistic, multi-perspective analysis of your engineering questions.
+
+    Args:
+        query: Your question or scenario
+        mode: Analysis mode:
+            - "orchestrated" (DEFAULT): Multi-persona analysis with intelligent selection
+            - "quick": Single persona (Snarky Senior Engineer) for fast answers
+            - "crisis": Emergency team (Incident Commander, SRE, Executive)
+            - "standards": Legacy mode (engineering standards only, no personas)
+        session_id: Session identifier
+        project_root: Absolute path to project root (for local rules/sessions)
+        specific_personas: Override auto-selection (e.g., ["security-sentinel", "pragmatic-architect"])
+        output_format: Response format ("brief", "standard", "executive")
+
+    Returns:
+        Orchestrated multi-perspective guidance with synthesis and recommendations
+
+    Examples:
+        # Auto-orchestrated (DEFAULT)
+        get_engineering_guidance(
+            query="Should we migrate to microservices?",
+            session_id="saas-backend"
+        )
+
+        # Crisis mode
+        get_engineering_guidance(
+            query="Production database is down",
+            mode="crisis"
+        )
+
+        # Specific personas
+        get_engineering_guidance(
+            query="Review this payment API design",
+            specific_personas=["security-sentinel", "api-platform-engineer"]
+        )
+    """
+    # Load session
+    session = session_mgr.get_or_create_session(session_id, project_root)
+
+    # Standards mode (legacy) - delegate to get_engineering_context
+    if mode == "standards":
+        return get_engineering_context(
+            operation="",
+            file_paths=None,
+            description=query,
+            session_id=session_id,
+            project_root=project_root
+        )
+
+    # Prepare session context for personas
+    session_context = {
+        'active_constraints': session.active_constraints,
+        'patterns_agreed': session.patterns_agreed,
+        'recent_decisions': [
+            {
+                'id': d.id,
+                'category': d.category,
+                'description': d.description,
+                'rationale': d.rationale
+            }
+            for d in session.decisions[-5:]  # Last 5 decisions
+        ] if session.decisions else []
+    }
+
+    # Orchestrate
+    result = orchestrator.orchestrate(
+        query=query,
+        mode=mode,
+        specific_personas=specific_personas,
+        output_format=output_format,
+        session_context=session_context
+    )
+
+    # Record consultation
+    session_mgr.add_consultation(
+        query=query,
+        mode=result['mode'],
+        personas_consulted=result['personas_consulted'],
+        context=result['context'],
+        synthesis=result['synthesis'],
+        project_root=project_root
+    )
+
+    return result['synthesis']
+
+
+@mcp.tool()
+def consult_skill(
+    skill_name: str,
+    query: str,
+    session_id: str = "default",
+    project_root: str = None
+) -> str:
+    """
+    Consult a single skill persona directly.
+
+    Use this when you want guidance from a specific expert without orchestration.
+
+    Args:
+        skill_name: Persona name (e.g., "snarky-senior-engineer", "security-sentinel")
+        query: Your question
+        session_id: Session identifier
+        project_root: Absolute path to project root
+
+    Returns:
+        The persona's perspective
+
+    Available Personas:
+        Core: snarky-senior-engineer, pragmatic-architect, legacy-archaeologist
+        Specialized: api-platform-engineer, data-engineer, frontend-ux-specialist, ml-pragmatist, mobile-platform-engineer
+        Operations: site-reliability-engineer, incident-commander, observability-engineer
+        Security: security-sentinel, compliance-guardian
+        Platform: devex-champion, platform-builder, qa-automation-engineer
+        Cost: finops-optimizer
+        Leadership: empathetic-team-lead, product-engineering-lead, executive-liaison, technical-writer
+        Meta: skill-orchestrator
+    """
+    # Load session
+    session = session_mgr.get_or_create_session(session_id, project_root)
+
+    # Get persona
+    persona = persona_registry.get(skill_name)
+    if not persona:
+        available = ", ".join(persona_registry.list_names())
+        return f"❌ Persona '{skill_name}' not found.\n\nAvailable personas:\n{available}"
+
+    # Prepare session context
+    session_context = {
+        'active_constraints': session.active_constraints,
+        'patterns_agreed': session.patterns_agreed,
+    }
+
+    # Get persona's perspective
+    perspective = persona.analyze(query, session_context)
+
+    # Record consultation
+    session_mgr.add_consultation(
+        query=query,
+        mode="single",
+        personas_consulted=[skill_name],
+        context="single_persona",
+        synthesis=perspective,
+        project_root=project_root
+    )
+
+    return f"# 💭 {persona.name.replace('-', ' ').title()}\n\n{perspective}"
+
+
+@mcp.tool()
+def list_available_skills(category: str = None) -> str:
+    """
+    List all available skill personas.
+
+    Args:
+        category: Optional filter (core, specialized, operations, security, platform, cost, leadership, meta)
+
+    Returns:
+        Formatted list of available personas with descriptions
+    """
+    if category:
+        if category not in persona_registry.get_categories():
+            available_categories = ", ".join(persona_registry.get_categories().keys())
+            return f"❌ Category '{category}' not found.\n\nAvailable categories: {available_categories}"
+
+        personas = persona_registry.get_by_category(category)
+        result = [f"# 🎭 {category.title()} Personas\n"]
+    else:
+        personas = persona_registry.get_all().values()
+        result = [f"# 🎭 All Available Personas ({len(personas)} total)\n"]
+
+    for persona in personas:
+        result.append(f"\n## {persona.name.replace('-', ' ').title()}")
+        result.append(f"{persona.description}\n")
+        if persona.expertise_areas:
+            result.append(f"**Expertise:** {', '.join(persona.expertise_areas[:5])}\n")
+
+    result.append("\n---\n")
+    result.append("**Usage:** `consult_skill(skill_name=\"...\", query=\"...\")` or `get_engineering_guidance(specific_personas=[\"...\"])`\n")
+
+    return "".join(result)
 
 
 if __name__ == "__main__":
