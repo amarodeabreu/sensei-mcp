@@ -201,6 +201,8 @@ Claude: [writes code that follows standards]
 
 - 🎯 **Context-aware loading** - Only 5-15% of rulebook per request (87.5% token savings)
 - 🧠 **Session memory** - Remembers architectural decisions across conversations
+- 🤝 **Team Sync** - Share decisions and rules via `.sensei` folder in your repo
+- 🕵️ **Git Awareness** - Automatically infer context from staged files
 - 📦 **50+ file types** - Comprehensive tech stack coverage
 - 🔍 **Smart inference** - Automatically determines relevant standards
 - 🛡️ **Consistent enforcement** - No more re-litigating patterns
@@ -330,6 +332,26 @@ check_consistency(
   session_id="saas-backend"
 )
 ```
+
+### 8. analyze_changes
+
+Automatically infer context from staged git changes.
+
+```python
+analyze_changes(project_root="/path/to/repo")
+```
+
+---
+
+## 🤝 Team Sync & Project Isolation
+
+Sensei supports sharing decisions and rules with your team:
+
+1.  **Create a `.sensei` folder** in your project root.
+2.  **Add `rules.md`** for custom project-specific rules.
+3.  **Run tools with `project_root`**: Decisions will be saved to `.sensei/decisions.md`.
+
+This allows you to commit your engineering memory to Git!
 
 ---
 

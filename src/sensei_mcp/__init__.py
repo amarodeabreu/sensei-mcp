@@ -4,7 +4,7 @@ Active context injection for 50+ file types with session memory.
 Transforms engineering standards from passive documentation into an active mentor.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .server import mcp
 
