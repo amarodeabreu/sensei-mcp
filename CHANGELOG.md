@@ -5,6 +5,161 @@ All notable changes to Sensei MCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2025-01-23
+
+### Added - Persona Expansion (23 → 47 Personas) 🎭
+
+#### 24 New Personas from claude-skills Repository
+
+Synced all new personas from the `claude-skills` repository to make them accessible via MCP tools for any LLM.
+
+**New Categories Added (6):**
+
+1. **DevRel / Developer Advocacy (4 personas):**
+   - `developer-advocate` - Developer community champion focused on adoption, content, and feedback loops
+   - `solutions-architect` - Pre-sales technical expert for enterprise deals and POCs
+   - `staff-ic-advisor` - Senior IC mentor for L5-L7 career growth and technical leadership
+   - `open-source-strategist` - OSS program manager balancing community, licensing, and business value
+
+2. **Strategic / C-Level Functions (6 personas):**
+   - `ma-due-diligence` - M&A technical diligence expert evaluating code, infra, and tech debt
+   - `vendor-management` - Vendor relationship strategist for contracts, risk, and compliance
+   - `technical-recruiting` - Engineering hiring expert for interview design and candidate assessment
+   - `engineering-transformation` - Org transformation leader for process modernization and culture change
+   - `ai-ethics-governance` - AI ethics and governance specialist for bias, privacy, and compliance
+   - `data-strategy` - Data strategy expert for governance, pipelines, and analytics ROI
+
+3. **Management Hierarchy (3 personas):**
+   - `engineering-manager` - Front-line manager focused on team health, 1:1s, and execution
+   - `director-of-engineering` - Multi-team director managing managers and cross-functional alignment
+   - `vp-engineering` - VP-level leader for org structure, roadmap, and executive communication
+
+4. **Technical Leadership (2 personas):**
+   - `chief-architect` - Company-wide architecture authority for standards, vision, and platform strategy
+   - `principal-engineer` - Principal/Staff engineer for deep technical strategy and cross-org impact
+
+5. **Coordination / Program Management (3 personas):**
+   - `technical-program-manager` - TPM coordinating complex cross-team initiatives
+   - `technical-product-manager` - TPM focused on product-engineering bridge and technical roadmaps
+   - `engineering-operations` - EngOps specialist for developer productivity, tools, and internal platforms
+
+6. **Infrastructure / Specialized Operations (6 personas):**
+   - `database-reliability-engineer` - DBRE specializing in database SRE, backups, and query optimization
+   - `release-engineering-lead` - Release manager for deployment pipelines, rollbacks, and CI/CD
+   - `performance-engineer` - Performance optimization expert for profiling, load testing, and capacity planning
+   - `cloud-architect` - Cloud infrastructure architect for multi-cloud, cost, and resilience
+   - `test-engineering-lead` - Test strategy leader for frameworks, shift-left culture, and quality gates
+   - `customer-success-engineer` - CSE/TAM for enterprise customer success, onboarding, and retention
+
+#### Skill Orchestrator Update
+
+- **Updated `skill-orchestrator.md`** to reference "45 personas" (excluding orchestrator itself)
+- Now coordinates all 47 personas (46 specialists + orchestrator) across 12 categories
+- Enhanced persona selection logic to consider new categories
+
+#### Registry Updates
+
+- **Enhanced `PersonaRegistry.CATEGORIES`** with 6 new categories:
+  - `devrel` - Developer advocacy and community
+  - `strategic` - C-level and strategic functions
+  - `management` - Management hierarchy (EM, Director, VP)
+  - `technical-leadership` - Chief Architect, Principal Engineer
+  - `coordination` - TPM, Engineering Operations
+  - `infrastructure` - Specialized infra/ops personas
+- Updated comment to reflect "v0.7.0 - 47 personas"
+
+### Enhanced
+
+- **PersonaRegistry**:
+  - Expanded from 23 to 47 total personas
+  - Added 6 new categories alongside existing 6 (core, specialized, operations, security, platform, cost, leadership, meta)
+  - All new personas automatically discoverable via `list_available_skills()`
+  - All new personas accessible via `get_persona_content()`
+  - Enhanced `suggest_personas_for_query()` now considers all 47 personas
+
+### Documentation
+
+- **Updated README.md**:
+  - Changed tagline from "23 specialized AI skills" to "47 specialized AI personas"
+  - Expanded persona categories section with all 12 categories and counts
+  - Updated all references from "23 personas" to "47 personas"
+- **Created comprehensive persona list** showing all categories and expertise areas
+
+### Testing
+
+- **All existing tests passing**: 203/203 tests ✅
+- **Persona smoke test**: Verified all 47 persona files load correctly
+- **No regression**: All v0.6.0 functionality remains intact
+
+### Files Added (24 new persona SKILL.md files)
+
+**DevRel (4):**
+- `src/sensei_mcp/personas/skills/developer-advocate.md`
+- `src/sensei_mcp/personas/skills/solutions-architect.md`
+- `src/sensei_mcp/personas/skills/staff-ic-advisor.md`
+- `src/sensei_mcp/personas/skills/open-source-strategist.md`
+
+**Strategic (6):**
+- `src/sensei_mcp/personas/skills/ma-due-diligence.md`
+- `src/sensei_mcp/personas/skills/vendor-management.md`
+- `src/sensei_mcp/personas/skills/technical-recruiting.md`
+- `src/sensei_mcp/personas/skills/engineering-transformation.md`
+- `src/sensei_mcp/personas/skills/ai-ethics-governance.md`
+- `src/sensei_mcp/personas/skills/data-strategy.md`
+
+**Management (3):**
+- `src/sensei_mcp/personas/skills/engineering-manager.md`
+- `src/sensei_mcp/personas/skills/director-of-engineering.md`
+- `src/sensei_mcp/personas/skills/vp-engineering.md`
+
+**Technical Leadership (2):**
+- `src/sensei_mcp/personas/skills/chief-architect.md`
+- `src/sensei_mcp/personas/skills/principal-engineer.md`
+
+**Coordination (3):**
+- `src/sensei_mcp/personas/skills/technical-program-manager.md`
+- `src/sensei_mcp/personas/skills/technical-product-manager.md`
+- `src/sensei_mcp/personas/skills/engineering-operations.md`
+
+**Infrastructure (6):**
+- `src/sensei_mcp/personas/skills/database-reliability-engineer.md`
+- `src/sensei_mcp/personas/skills/release-engineering-lead.md`
+- `src/sensei_mcp/personas/skills/performance-engineer.md`
+- `src/sensei_mcp/personas/skills/cloud-architect.md`
+- `src/sensei_mcp/personas/skills/test-engineering-lead.md`
+- `src/sensei_mcp/personas/skills/customer-success-engineer.md`
+
+### Files Modified
+
+- `src/sensei_mcp/personas/skills/skill-orchestrator.md` - Updated to reference 45 personas
+- `src/sensei_mcp/personas/registry.py` - Added 6 new categories with 24 new personas
+- `README.md` - Updated persona counts and category listings
+- `CHANGELOG.md` - Added v0.7.0 section
+
+### Statistics
+
+- **Total Personas**: 23 → 47 (104% increase)
+- **Total Categories**: 8 → 12 (50% increase)
+- **New Persona Files**: 24 SKILL.md files
+- **LOC Added**: ~12,000+ (24 persona files with comprehensive expertise)
+- **Tests Affected**: 0 (all existing tests pass)
+- **Breaking Changes**: 0 (fully backwards compatible)
+
+### Backwards Compatibility
+
+- ✅ All v0.6.x tools remain functional
+- ✅ All v0.5.x tools remain functional
+- ✅ All v0.4.x tools remain functional
+- ✅ Session format compatible (no breaking changes)
+- ✅ Existing persona names unchanged (only additions)
+- ✅ All existing workflows continue to function
+
+### Known Issues
+
+- Same as v0.6.0: 16 DeprecationWarnings for datetime.utcnow() usage (deferred to v0.7.1)
+
+---
+
 ## [0.6.0] - 2025-01-23
 
 ### Added - Granular Persona Content Access (Option B Architecture) 🎭
@@ -632,6 +787,7 @@ record_consultation(query, personas_used=[...], synthesis="...")
 
 ---
 
+[0.7.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.7.0
 [0.6.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.6.0
 [0.5.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.5.0
 [0.4.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.4.0

@@ -6,11 +6,11 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-> Multi-persona engineering mentor with 23 specialized AI skills orchestrating collaborative guidance
+> Multi-persona engineering mentor with 47 specialized AI personas orchestrating collaborative guidance
 
 **NEW in v0.6.0:** Granular Persona Content Access (Option B Architecture) - Fixed orchestrator placeholder bug with new content-provider architecture. MCP now provides persona SKILL.md content for Claude to analyze, instead of trying to perform analysis itself. 4 new granular tools for persona discovery, content access, session context, and consultation recording.
 
-**v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona (23rd expert).
+**v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona.
 
 **v0.4.0:** Analytics & Team Collaboration - Track persona effectiveness, export session summaries as ADRs, and share engineering decisions with your team.
 
@@ -241,7 +241,7 @@ Claude: [writes code that follows standards]
   - 4 merge strategies (latest, oldest, all, manual)
   - Session comparison for side-by-side analysis
   - Attribution tracking for all decisions
-- 🗄️ **Database Architect Persona** - 23rd specialized expert joins the team:
+- 🗄️ **Database Architect Persona** - Specialized database expert joins the team:
   - Schema design and normalization expertise
   - Query optimization and indexing strategies
   - Migration planning and scalability patterns
@@ -268,11 +268,21 @@ Claude: [writes code that follows standards]
 
 ### v0.3.0 - Multi-Persona Orchestrator 🎭
 
-- 🎭 **23 Specialized Personas** - Skill Orchestrator coordinates expert perspectives:
-  - **Core Skills:** Snarky Senior Engineer, Pragmatic Architect, Legacy Archaeologist
-  - **Specialized Skills:** Security Sentinel, FinOps Optimizer, Database Architect, Performance Engineer, Product Engineering Lead, API Architect
-  - **Operations:** Incident Commander, SRE, Executive Liaison, Compliance Guardian
-  - **Plus 12+ more:** DevX Advocate, Tech Debt Wrangler, Data Platform Engineer, Frontend Performance, Staff+ Mentor, Mobile Platform Engineer, etc.
+- 🎭 **47 Specialized Personas** - Skill Orchestrator coordinates expert perspectives across 12 categories:
+  - **Core (3):** Snarky Senior Engineer, Pragmatic Architect, Legacy Archaeologist
+  - **Specialized (6):** API Platform Engineer, Data Engineer, Database Architect, Frontend UX Specialist, ML Pragmatist, Mobile Platform Engineer
+  - **Operations (3):** Site Reliability Engineer, Incident Commander, Observability Engineer
+  - **Security (2):** Security Sentinel, Compliance Guardian
+  - **Platform (3):** DevEx Champion, Platform Builder, QA Automation Engineer
+  - **Cost (1):** FinOps Optimizer
+  - **Leadership (4):** Empathetic Team Lead, Product Engineering Lead, Executive Liaison, Technical Writer
+  - **DevRel (4):** Developer Advocate, Solutions Architect, Staff IC Advisor, Open Source Strategist
+  - **Strategic (6):** M&A Due Diligence, Vendor Management, Technical Recruiting, Engineering Transformation, AI Ethics Governance, Data Strategy
+  - **Management (3):** Engineering Manager, Director of Engineering, VP Engineering
+  - **Technical Leadership (2):** Chief Architect, Principal Engineer
+  - **Coordination (3):** Technical Program Manager, Technical Product Manager, Engineering Operations
+  - **Infrastructure (6):** Database Reliability Engineer, Release Engineering Lead, Performance Engineer, Cloud Architect, Test Engineering Lead, Customer Success Engineer
+  - **Meta (1):** Skill Orchestrator
 - 🧠 **Context Detection** - Intelligently routes queries to relevant personas (CRISIS, SECURITY, POLITICAL, ARCHITECTURAL, COST, TEAM, TECHNICAL)
 - 🤝 **Collaborative Synthesis** - Multiple perspectives with conflict resolution and consensus building
 - 📊 **Consultation Tracking** - Session memory records which personas were consulted and why
@@ -628,7 +638,7 @@ consult_skill(
 
 #### 12. list_available_skills
 
-Discover all 23 available personas organized by category.
+Discover all 47 available personas organized by category.
 
 ```python
 # List all personas (standard format)

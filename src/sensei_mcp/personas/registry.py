@@ -44,7 +44,7 @@ class PersonaRegistry:
     Provides lazy loading, caching, and categorization of personas.
     """
 
-    # Persona categories based on the README
+    # Persona categories based on the skill-orchestrator (v0.7.0 - 47 personas)
     CATEGORIES = {
         'core': ['snarky-senior-engineer', 'pragmatic-architect', 'legacy-archaeologist'],
         'specialized': [
@@ -60,6 +60,29 @@ class PersonaRegistry:
         'leadership': [
             'empathetic-team-lead', 'product-engineering-lead',
             'executive-liaison', 'technical-writer'
+        ],
+        'devrel': [
+            'developer-advocate', 'solutions-architect', 'staff-ic-advisor',
+            'open-source-strategist'
+        ],
+        'strategic': [
+            'ma-due-diligence', 'vendor-management', 'technical-recruiting',
+            'engineering-transformation', 'ai-ethics-governance', 'data-strategy'
+        ],
+        'management': [
+            'engineering-manager', 'director-of-engineering', 'vp-engineering'
+        ],
+        'technical-leadership': [
+            'chief-architect', 'principal-engineer'
+        ],
+        'coordination': [
+            'technical-program-manager', 'technical-product-manager',
+            'engineering-operations'
+        ],
+        'infrastructure': [
+            'database-reliability-engineer', 'release-engineering-lead',
+            'performance-engineer', 'cloud-architect', 'test-engineering-lead',
+            'customer-success-engineer'
         ],
         'meta': ['skill-orchestrator']
     }
