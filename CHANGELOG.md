@@ -5,6 +5,104 @@ All notable changes to Sensei MCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-01-23
+
+### Added - Analytics & Team Collaboration 📊
+
+#### Session Analytics (`get_session_insights`)
+- **Data-driven insights** into persona usage and consultation patterns
+- **Time-based filtering**: last 7 days, last 30 days, all time
+- **Persona statistics**:
+  - Consultation counts and decision influence per persona
+  - First/last consultation timestamps
+  - Average synthesis length
+  - Contexts where each persona was used
+- **Context distribution**: track which engineering contexts (SECURITY, CRISIS, etc.) are most common
+- **Decision metrics**:
+  - Decision velocity (decisions per day)
+  - Average time to decision (consultations per decision)
+- **Session health**:
+  - Session age in days
+  - Active days count
+  - Average consultations per day
+- **Multiple output formats**: Markdown (reports), JSON (CI/CD), text (quick view)
+- **Configurable filtering**: minimum consultations threshold for persona stats
+
+#### Consultation Export (`export_consultation`)
+- **Professional reports** for individual consultations
+- **Metadata support**: consultation ID, timestamp, mode, context
+- **Persona tracking**: which experts were consulted
+- **Decision linking**: automatically links to decisions made from consultation
+- **Multiple formats**: Markdown (human-readable), JSON (API integration), text (plain)
+- **Optional metadata**: toggle metadata inclusion for cleaner reports
+
+#### Session Summary Export (`export_session_summary`)
+- **Architecture Decision Records (ADRs)**: comprehensive decision documentation
+- **ADR format** includes:
+  - Decision description and category
+  - Rationale and timestamp
+  - Associated constraints and patterns (from decision context dict)
+  - Linked consultations
+- **Consultation history**: recent consultations with personas and outcomes
+- **Active constraints**: current project requirements and limitations
+- **Agreed patterns**: architectural patterns the team has adopted
+- **Configurable includes**: select which sections to include (decisions, consultations, constraints, patterns)
+- **Configurable consultation limit**: control how many recent consultations to include
+- **Multiple formats**: Markdown (documentation), JSON (tooling), text (summaries)
+- **Team onboarding**: perfect for sharing engineering context with new team members
+
+#### New MCP Tools (3)
+- `get_session_insights()` - Analyze persona usage and decision patterns
+- `export_consultation()` - Export individual consultations as reports
+- `export_session_summary()` - Export comprehensive ADRs and session context
+
+### Enhanced
+- **Session persistence**: consultations now stored with full metadata
+- **Decision context**: decisions track constraints and patterns in context dict
+- **SessionState model**: added patterns_agreed field
+- **Analytics module**: comprehensive session analysis engine
+- **Export utilities**: flexible export system for consultations and sessions
+
+### Testing
+- Added `tests/test_analytics.py` with 17 test cases
+  - PersonaStats and SessionInsights data classes
+  - SessionAnalyzer with time-range filtering
+  - Persona statistics calculation
+  - Context and mode distribution analysis
+  - Decision velocity calculations
+  - Output formatting (markdown, JSON, text)
+- Added `tests/test_exporter.py` with 17 test cases
+  - ConsultationExporter in all formats
+  - SessionExporter with configurable includes
+  - ADR generation with constraint/pattern handling
+  - Consultation truncation and metadata toggling
+- All 34 new tests passing with 100% coverage
+
+### Documentation
+- Updated README.md with v0.4.0 features and tool examples
+- Created comprehensive CHANGELOG.md entry
+- Updated tool count: 14 total MCP tools (3 new in v0.4.0)
+- Added analytics and export examples to usage section
+
+### Technical Details
+- Added `src/sensei_mcp/analytics.py` (~400 LOC)
+  - PersonaStats dataclass for individual persona metrics
+  - SessionInsights dataclass for comprehensive analytics
+  - SessionAnalyzer with filtering and formatting
+- Added `src/sensei_mcp/exporter.py` (~380 LOC)
+  - ConsultationExporter for single consultation reports
+  - SessionExporter for ADRs and session summaries
+- Enhanced `src/sensei_mcp/server.py` with 3 new MCP tool exports
+- Updated Decision model usage: constraints/patterns stored in context dict
+
+### Backwards Compatibility
+- ✅ All v0.3.x tools remain functional
+- ✅ All v0.2.x tools remain functional
+- ✅ Session format compatible (no breaking changes)
+- ✅ All existing workflows continue to function
+
+---
+
 ## [0.3.0] - 2025-01-22
 
 ### Added - Multi-Persona Orchestrator 🎭
@@ -142,6 +240,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.4.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.4.0
 [0.3.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.3.0
 [0.2.1]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.2.1
 [0.2.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.2.0

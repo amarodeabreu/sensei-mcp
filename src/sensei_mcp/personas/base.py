@@ -30,6 +30,11 @@ class BasePersona(ABC):
         self._personality = skill_data.get('personality', '')
         self._expertise = skill_data.get('expertise', [])
         self._full_content = skill_data.get('full_content', '')
+        # v0.4.0: Enhanced metadata
+        self._examples = skill_data.get('examples', [])
+        self._use_when = skill_data.get('use_when', '')
+        self._related = skill_data.get('related', [])
+        self._quick_tip = skill_data.get('quick_tip', '')
 
     @property
     def name(self) -> str:
@@ -60,6 +65,27 @@ class BasePersona(ABC):
     def full_content(self) -> str:
         """Full SKILL.md content for detailed analysis"""
         return self._full_content
+
+    # v0.4.0: Enhanced metadata properties
+    @property
+    def examples(self) -> List[str]:
+        """Example queries where this persona would be helpful"""
+        return self._examples
+
+    @property
+    def use_when(self) -> str:
+        """Description of when to consult this persona"""
+        return self._use_when
+
+    @property
+    def related_personas(self) -> List[str]:
+        """Names of related/complementary personas"""
+        return self._related
+
+    @property
+    def quick_tip(self) -> str:
+        """One-line expertise summary for quick reference"""
+        return self._quick_tip or self.description
 
     def analyze(self, query: str, context: Optional[Dict] = None) -> str:
         """

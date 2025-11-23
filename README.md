@@ -8,7 +8,9 @@
 
 > Multi-persona engineering mentor with 22 specialized AI skills orchestrating collaborative guidance
 
-**NEW in v0.3.0:** Sensei now features a **Skill Orchestrator** with 22 specialized personas (Snarky Senior Engineer, Pragmatic Architect, Security Sentinel, FinOps Optimizer, and 18 more) that collaborate to provide nuanced, multi-perspective engineering guidance.
+**NEW in v0.4.0:** Analytics & Team Collaboration - Track persona effectiveness, export session summaries as ADRs, and share engineering decisions with your team.
+
+**v0.3.0:** Sensei features a **Skill Orchestrator** with 22 specialized personas (Snarky Senior Engineer, Pragmatic Architect, Security Sentinel, FinOps Optimizer, and 18 more) that collaborate to provide nuanced, multi-perspective engineering guidance.
 
 Sensei transforms your engineering standards from passive documentation into an active mentor that injects relevant guidelines **before** Claude reasons, maintaining session memory of architectural decisions.
 
@@ -201,6 +203,25 @@ Claude: [writes code that follows standards]
 
 ## ⚡ Key Features
 
+### v0.4.0 - Analytics & Team Collaboration 📊
+
+- 📊 **Session Analytics** - Data-driven insights into persona usage and decision patterns:
+  - Track which personas are most/least used
+  - Context distribution (SECURITY, CRISIS, ARCHITECTURAL, etc.)
+  - Decision velocity and consultation patterns
+  - Time-based filtering (last 7 days, last 30 days, all time)
+  - Export as markdown, JSON, or text
+- 📄 **Consultation Export** - Share individual consultations as professional reports:
+  - Markdown format with metadata (ID, timestamp, mode, context)
+  - JSON format for CI/CD integration
+  - Plain text for communication tools
+- 📋 **Session Summaries** - Export comprehensive ADRs (Architecture Decision Records):
+  - Full decision history with rationale
+  - Active constraints and agreed patterns
+  - Recent consultation history
+  - Configurable includes (decisions, consultations, constraints, patterns)
+  - Perfect for team onboarding and alignment
+
 ### v0.3.0 - Multi-Persona Orchestrator 🎭
 
 - 🎭 **22 Specialized Personas** - Skill Orchestrator coordinates expert perspectives:
@@ -273,11 +294,77 @@ package.json, Gemfile, **Cargo.toml**, **go.mod**, requirements.txt, **Pipfile**
 
 ## 🛠️ Usage
 
-Sensei provides **10 MCP tools** (3 new in v0.3.0):
+Sensei provides **13 MCP tools** (3 new in v0.4.0, 3 in v0.3.0):
 
-### NEW v0.3.0 Tools - Multi-Persona Orchestrator
+### NEW v0.4.0 Tools - Analytics & Collaboration
 
-#### 1. get_engineering_guidance (NEW - Primary Tool)
+#### 1. get_session_insights (NEW)
+
+Get data-driven insights into persona usage, consultation patterns, and decision velocity.
+
+```python
+# Get insights for last 7 days
+get_session_insights(
+  session_id="saas-backend",
+  time_range="last_7_days",  # "last_7_days", "last_30_days", "all_time"
+  format="markdown",  # "markdown", "json", "text"
+  min_consultations=2  # Only include personas with 2+ consultations
+)
+# Returns: Most/least used personas, context distribution, decision metrics
+
+# Get JSON for CI/CD integration
+get_session_insights(
+  session_id="saas-backend",
+  format="json"
+)
+```
+
+#### 2. export_consultation (NEW)
+
+Export a single consultation as a shareable report.
+
+```python
+# Export as markdown with full metadata
+export_consultation(
+  consultation_id="c-2025-01-22-001",
+  session_id="saas-backend",
+  format="markdown",  # "markdown", "json", "text"
+  include_metadata=True
+)
+# Returns: Professional report with query, personas consulted, synthesis, linked decision
+
+# Export as JSON for API integration
+export_consultation(
+  consultation_id="c-2025-01-22-001",
+  format="json"
+)
+```
+
+#### 3. export_session_summary (NEW)
+
+Export comprehensive ADRs and session summaries for team sharing.
+
+```python
+# Full session export with all sections
+export_session_summary(
+  session_id="saas-backend",
+  format="markdown",  # "markdown", "json", "text"
+  include=["decisions", "consultations", "constraints", "patterns"],
+  max_consultations=10
+)
+# Returns: ADRs, consultation history, constraints, patterns in markdown
+
+# Export only decisions as JSON
+export_session_summary(
+  session_id="saas-backend",
+  format="json",
+  include=["decisions"]
+)
+```
+
+### v0.3.0 Tools - Multi-Persona Orchestrator
+
+#### 4. get_engineering_guidance (Primary Tool)
 
 Get collaborative multi-persona guidance on any engineering question.
 
@@ -311,7 +398,7 @@ get_engineering_guidance(
 )
 ```
 
-#### 2. consult_skill (NEW)
+#### 5. consult_skill
 
 Consult a single persona directly for targeted expertise.
 
@@ -323,7 +410,7 @@ consult_skill(
 )
 ```
 
-#### 3. list_available_skills (NEW)
+#### 6. list_available_skills
 
 Discover all 22 available personas organized by category.
 
@@ -338,7 +425,7 @@ list_available_skills(category="specialized")  # Security, FinOps, Performance, 
 
 ### Core Tools (v0.2.x) - Still Supported
 
-#### 4. get_engineering_context (Legacy)
+#### 7. get_engineering_context (Legacy)
 
 Smart context injection - loads relevant standards based on files and operation.
 
@@ -355,7 +442,7 @@ get_engineering_context(
 # Returns: API contracts, security, multi-tenancy, idempotency standards
 ```
 
-#### 5. record_decision
+#### 8. record_decision
 
 Save architectural decisions to prevent re-litigation.
 
@@ -368,7 +455,7 @@ record_decision(
 )
 ```
 
-#### 6. validate_against_standards
+#### 9. validate_against_standards
 
 Pre-implementation validation check.
 
@@ -380,7 +467,7 @@ validate_against_standards(
 )
 ```
 
-#### 7. get_session_summary
+#### 10. get_session_summary
 
 Review all decisions and constraints for current project.
 
@@ -388,7 +475,7 @@ Review all decisions and constraints for current project.
 get_session_summary(session_id="saas-backend")
 ```
 
-#### 8. list_sessions
+#### 11. list_sessions
 
 Manage multiple projects with separate session states.
 
@@ -396,7 +483,7 @@ Manage multiple projects with separate session states.
 list_sessions()
 ```
 
-#### 9. query_specific_standard
+#### 12. query_specific_standard
 
 Direct access to specific rulebook sections.
 
@@ -407,7 +494,7 @@ query_specific_standard(
 )
 ```
 
-#### 10. check_consistency
+#### 13. check_consistency
 
 Validate proposed changes against past decisions.
 
@@ -418,7 +505,7 @@ check_consistency(
 )
 ```
 
-#### 11. analyze_changes
+#### 14. analyze_changes
 
 Automatically infer context from staged git changes.
 

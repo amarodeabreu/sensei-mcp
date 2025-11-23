@@ -64,11 +64,21 @@ class SkillLoader:
         personality = SkillLoader._extract_personality(content)
         expertise = SkillLoader._extract_expertise(content, metadata)
 
+        # Extract optional v0.4.0 fields from metadata
+        examples = metadata.get('examples', [])
+        use_when = metadata.get('use_when', '')
+        related = metadata.get('related', [])
+        quick_tip = metadata.get('quick_tip', '')
+
         return {
             'metadata': metadata,
             'principles': principles,
             'personality': personality,
             'expertise': expertise,
+            'examples': examples,  # v0.4.0: Example queries
+            'use_when': use_when,  # v0.4.0: When to consult this persona
+            'related': related,    # v0.4.0: Related persona names
+            'quick_tip': quick_tip,  # v0.4.0: One-line expertise summary
             'full_content': content
         }
 

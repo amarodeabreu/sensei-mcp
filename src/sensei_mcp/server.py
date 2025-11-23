@@ -19,6 +19,8 @@ from .session import SessionManager
 from .engine import ContextInferenceEngine, RulebookLoader
 from .personas.registry import PersonaRegistry
 from .orchestrator import SkillOrchestrator
+from .analytics import SessionAnalyzer
+from .exporter import ConsultationExporter, SessionExporter
 
 # Initialize MCP server
 mcp = FastMCP("sensei")
@@ -631,6 +633,177 @@ def list_available_skills(category: str = None) -> str:
     result.append("**Usage:** `consult_skill(skill_name=\"...\", query=\"...\")` or `get_engineering_guidance(specific_personas=[\"...\"])`\n")
 
     return "".join(result)
+
+
+# ============================================================================
+# v0.4.0 NEW TOOLS - Session Analytics & Team Collaboration
+# ============================================================================
+
+@mcp.tool()
+def get_session_insights(
+    session_id: str = "default",
+    project_root: str = None,
+    time_range: str = "all_time",
+    format: str = "markdown"
+) -> str:
+    """
+    Get comprehensive analytics and insights for a session.
+
+    Provides data-driven insights into persona usage patterns, consultation frequency,
+    decision-making trends, and session health metrics.
+
+    Args:
+        session_id: Session identifier
+        project_root: Absolute path to project root (for local sessions)
+        time_range: Analysis window:
+            - "all_time" (default): All consultations
+            - "last_7_days": Last 7 days
+            - "last_30_days": Last 30 days
+        format: Output format ("markdown", "json", "text")
+
+    Returns:
+        Formatted analytics report with:
+        - Persona usage statistics (most/least used)
+        - Context distribution (CRISIS, SECURITY, etc.)
+        - Mode usage (orchestrated, quick, crisis, standards)
+        - Decision metrics and velocity
+        - Session health indicators
+
+    Examples:
+        # Get all-time insights
+        get_session_insights(session_id="my-project")
+
+        # Last 30 days in JSON
+        get_session_insights(
+            session_id="my-project",
+            time_range="last_30_days",
+            format="json"
+        )
+    """
+    # Load session
+    session = session_mgr.get_or_create_session(session_id, project_root)
+
+    # Analyze
+    analyzer = SessionAnalyzer(session)
+    insights = analyzer.get_insights(time_range=time_range)
+
+    # Format output
+    return analyzer.format_insights(insights, format=format)
+
+
+@mcp.tool()
+def export_consultation(
+    consultation_id: str,
+    session_id: str = "default",
+    project_root: str = None,
+    format: str = "markdown"
+) -> str:
+    """
+    Export a single consultation as shareable report.
+
+    Perfect for sharing specific decision-making discussions with your team,
+    documenting why you chose a particular approach, or creating ADRs.
+
+    Args:
+        consultation_id: Consultation ID (e.g., "consult_1")
+        session_id: Session identifier
+        project_root: Absolute path to project root
+        format: Output format ("markdown", "json", "text")
+
+    Returns:
+        Formatted consultation report
+
+    Examples:
+        # Export as markdown
+        export_consultation(
+            consultation_id="consult_5",
+            session_id="my-project"
+        )
+
+        # Export as JSON for CI/CD
+        export_consultation(
+            consultation_id="consult_5",
+            format="json"
+        )
+    """
+    # Load session
+    session = session_mgr.get_or_create_session(session_id, project_root)
+
+    # Find consultation
+    consultation = next(
+        (c for c in session.consultations if c.id == consultation_id),
+        None
+    )
+
+    if not consultation:
+        return f"❌ Consultation '{consultation_id}' not found in session '{session_id}'.\n\nAvailable consultations: {', '.join([c.id for c in session.consultations])}"
+
+    # Export
+    return ConsultationExporter.export_consultation(consultation, format=format)
+
+
+@mcp.tool()
+def export_session_summary(
+    session_id: str = "default",
+    project_root: str = None,
+    format: str = "markdown",
+    include: List[str] = None,
+    max_consultations: int = 10
+) -> str:
+    """
+    Export comprehensive session summary for team sharing.
+
+    Generates Architecture Decision Records (ADRs), consultation history,
+    and active constraints/patterns. Perfect for:
+    - Onboarding new team members
+    - Documenting architectural decisions
+    - Sharing team knowledge
+    - Creating weekly/monthly reports
+
+    Args:
+        session_id: Session identifier
+        project_root: Absolute path to project root
+        format: Output format ("markdown", "json", "text")
+        include: Components to include (default: all)
+            - "decisions": Architecture decisions
+            - "consultations": Consultation history
+            - "constraints": Active constraints
+            - "patterns": Agreed patterns
+        max_consultations: Max recent consultations to include (default: 10)
+
+    Returns:
+        Comprehensive session summary report
+
+    Examples:
+        # Full summary
+        export_session_summary(session_id="my-project")
+
+        # Just decisions and constraints
+        export_session_summary(
+            session_id="my-project",
+            include=["decisions", "constraints"]
+        )
+
+        # JSON export for processing
+        export_session_summary(
+            session_id="my-project",
+            format="json"
+        )
+    """
+    # Default includes
+    if include is None:
+        include = ["decisions", "consultations", "constraints", "patterns"]
+
+    # Load session
+    session = session_mgr.get_or_create_session(session_id, project_root)
+
+    # Export
+    return SessionExporter.export_session_summary(
+        session=session,
+        format=format,
+        include=include,
+        max_consultations=max_consultations
+    )
 
 
 if __name__ == "__main__":
