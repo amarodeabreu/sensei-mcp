@@ -642,6 +642,16 @@ def get_engineering_guidance(
     """
     Get engineering guidance via multi-persona orchestration (DEFAULT in v0.3.0).
 
+    ⚠️ DEPRECATION NOTICE (v0.6.0):
+    This tool will be deprecated in v0.7.0. Please use the new granular tools instead:
+    - suggest_personas_for_query() - Get persona suggestions
+    - get_persona_content() - Get persona SKILL.md content
+    - get_session_context() - Get session memory
+    - record_consultation() - Record consultation after analysis
+
+    The new architecture provides content for Claude to analyze, rather than
+    trying to perform analysis within the MCP server.
+
     This is the NEW primary tool for getting engineering guidance.
     The Skill Orchestrator coordinates 21 specialized personas to provide
     holistic, multi-perspective analysis of your engineering questions.
@@ -746,6 +756,11 @@ def consult_skill(
 ) -> str:
     """
     Consult a single skill persona directly.
+
+    ⚠️ DEPRECATION NOTICE (v0.6.0):
+    This tool will be deprecated in v0.7.0. Please use get_persona_content() instead:
+    - get_persona_content(persona_name=skill_name) - Get full SKILL.md content
+    Then Claude performs the analysis using that content as context.
 
     Use this when you want guidance from a specific expert without orchestration.
 
@@ -886,6 +901,256 @@ def list_available_skills(
     result.append("**Usage:** `consult_skill(skill_name=\"...\", query=\"...\")` or `get_engineering_guidance(specific_personas=[\"...\"])`\n")
 
     return "".join(result)
+
+
+# ============================================================================
+# v0.6.0 NEW TOOLS - Option B: Granular Persona Content Access
+# ============================================================================
+
+@mcp.tool()
+def get_persona_content(
+    persona_name: str,
+    include_metadata: bool = True
+) -> str:
+    """
+    Get full skill content for a specific persona.
+
+    This returns the complete SKILL.md content that defines the persona's
+    expertise, principles, personality, and guidelines. The calling LLM
+    should use this content to analyze queries from that persona's perspective.
+
+    **MCP Design Philosophy:**
+    This tool returns CONTENT for the LLM to use, not pre-generated analysis.
+    The calling LLM (Claude) receives the persona content and performs
+    the analysis itself.
+
+    Args:
+        persona_name: Name of persona (e.g., "security-sentinel", "pragmatic-architect")
+        include_metadata: Include metadata header (name, description, expertise)
+
+    Returns:
+        Full persona skill content (markdown format)
+
+    Example:
+        # Get Security Sentinel's content
+        content = get_persona_content("security-sentinel")
+
+        # Claude then uses this content to analyze from that perspective
+    """
+    persona = persona_registry.get(persona_name)
+
+    if not persona:
+        available = ", ".join(sorted(persona_registry.list_names()))
+        return f"❌ Persona '{persona_name}' not found.\n\nAvailable personas: {available}"
+
+    result = []
+
+    # Optional metadata header
+    if include_metadata:
+        result.append(f"# {persona.name.replace('-', ' ').title()}\n")
+        result.append(f"**Description:** {persona.description}\n")
+        if persona.expertise_areas:
+            result.append(f"**Expertise:** {', '.join(persona.expertise_areas)}\n")
+        result.append(f"\n---\n\n")
+
+    # Full skill content (the complete SKILL.md)
+    result.append(persona.full_content)
+
+    return "".join(result)
+
+
+@mcp.tool()
+def suggest_personas_for_query(
+    query: str,
+    max_suggestions: int = 5,
+    context_hint: str = None
+) -> str:
+    """
+    Suggest relevant personas for a given query using intelligent selection.
+
+    Uses keyword matching, context detection, and relevance scoring to
+    recommend which personas would be most helpful for the query.
+
+    **MCP Design Philosophy:**
+    This tool helps the LLM discover which personas to consult, but doesn't
+    perform analysis itself. The LLM uses the suggestions to call
+    get_persona_content() for each recommended persona.
+
+    Args:
+        query: The user's question or scenario
+        max_suggestions: Maximum number of personas to suggest (default: 5)
+        context_hint: Optional context hint to improve suggestions
+                     (e.g., "crisis", "security", "architectural")
+
+    Returns:
+        JSON list of suggested personas with relevance scores and rationale
+
+    Example:
+        # Get suggestions for a query
+        suggestions = suggest_personas_for_query(
+            query="How should we handle user authentication?",
+            max_suggestions=3
+        )
+
+        # Returns JSON with suggested personas and why they're relevant
+        # LLM then calls get_persona_content() for each suggestion
+    """
+    from .context_detector import ContextDetector, QueryContext
+
+    detector = ContextDetector()
+
+    # Detect context if not provided
+    if context_hint:
+        try:
+            primary_context = QueryContext(context_hint.upper())
+        except ValueError:
+            primary_context = detector.get_primary_context(query)
+    else:
+        primary_context = detector.get_primary_context(query)
+
+    # Select personas using orchestrator's selection logic
+    personas = orchestrator.select_personas(
+        query=query,
+        mode='auto',
+        specific_personas=None,
+        max_personas=max_suggestions
+    )
+
+    # Build suggestions with rationale
+    suggestions = []
+    for persona in personas:
+        relevance = persona.relevance_score(query)
+
+        # Generate rationale based on expertise match
+        matched_expertise = [
+            kw for kw in persona.expertise_areas
+            if kw.lower() in query.lower()
+        ]
+
+        if matched_expertise:
+            rationale = f"Expert in {', '.join(matched_expertise[:3])}"
+        else:
+            rationale = f"Relevant for {primary_context.value} context"
+
+        suggestions.append({
+            "name": persona.name,
+            "display_name": persona.name.replace('-', ' ').title(),
+            "relevance": round(relevance, 2),
+            "rationale": rationale
+        })
+
+    # Return as JSON
+    result = {
+        "query": query,
+        "detected_context": primary_context.value,
+        "suggestions": suggestions,
+        "count": len(suggestions)
+    }
+
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def get_session_context(
+    session_id: str = "default",
+    project_root: str = None
+) -> str:
+    """
+    Get session context (constraints, decisions, patterns) for context-aware analysis.
+
+    Returns session memory that can be included when asking personas to analyze queries.
+    This ensures consistency with previous decisions and agreed patterns.
+
+    **MCP Design Philosophy:**
+    This tool returns session memory as data. The LLM includes this context
+    when analyzing queries to ensure consistency with previous decisions.
+
+    Args:
+        session_id: Session identifier
+        project_root: Optional project root for local sessions
+
+    Returns:
+        JSON with session constraints, patterns, and recent decisions
+
+    Example:
+        # Get session context
+        context = get_session_context(session_id="my-project")
+
+        # LLM includes this when asking persona to analyze:
+        # "Given these constraints: ..., analyze this query"
+    """
+    session = session_mgr.get_or_create_session(session_id, project_root)
+
+    context = {
+        "session_id": session_id,
+        "active_constraints": session.active_constraints,
+        "patterns_agreed": session.patterns_agreed,
+        "recent_decisions": [
+            {
+                "id": d.id,
+                "category": d.category,
+                "description": d.description,
+                "rationale": d.rationale,
+                "timestamp": d.timestamp.isoformat() if hasattr(d, 'timestamp') else None
+            }
+            for d in session.decisions[-5:]  # Last 5 decisions
+        ] if session.decisions else []
+    }
+
+    return json.dumps(context, indent=2)
+
+
+@mcp.tool()
+def record_consultation(
+    query: str,
+    personas_used: List[str],
+    session_id: str = "default",
+    project_root: str = None,
+    synthesis: str = None
+) -> str:
+    """
+    Record a consultation in session history.
+
+    After Claude analyzes a query using persona content, record the consultation
+    for session analytics and history.
+
+    Args:
+        query: The original query
+        personas_used: List of persona names that were consulted
+        session_id: Session identifier
+        project_root: Optional project root
+        synthesis: Optional synthesis/recommendation from Claude
+
+    Returns:
+        Confirmation with consultation ID
+
+    Example:
+        # After Claude analyzes using persona content:
+        record_consultation(
+            query="Should we migrate to microservices?",
+            personas_used=["pragmatic-architect", "site-reliability-engineer"],
+            synthesis="[Claude's full analysis and recommendation]"
+        )
+    """
+    # Record consultation
+    consultation_id = session_mgr.add_consultation(
+        query=query,
+        mode="manual",  # Manual multi-persona consultation
+        personas_consulted=personas_used,
+        context="option_b_flow",
+        synthesis=synthesis or "[Synthesis performed by calling LLM]",
+        project_root=project_root
+    )
+
+    return f"""✅ Consultation recorded
+
+**ID:** {consultation_id}
+**Query:** {query}
+**Personas Used:** {', '.join(personas_used)}
+**Session:** {session_id}
+
+This consultation has been added to session history and will be included in analytics.
+"""
 
 
 # ============================================================================

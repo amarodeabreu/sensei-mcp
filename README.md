@@ -8,11 +8,11 @@
 
 > Multi-persona engineering mentor with 23 specialized AI skills orchestrating collaborative guidance
 
-**NEW in v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona (23rd expert).
+**NEW in v0.6.0:** Granular Persona Content Access (Option B Architecture) - Fixed orchestrator placeholder bug with new content-provider architecture. MCP now provides persona SKILL.md content for Claude to analyze, instead of trying to perform analysis itself. 4 new granular tools for persona discovery, content access, session context, and consultation recording.
+
+**v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona (23rd expert).
 
 **v0.4.0:** Analytics & Team Collaboration - Track persona effectiveness, export session summaries as ADRs, and share engineering decisions with your team.
-
-**v0.3.0:** Sensei features a **Skill Orchestrator** with specialized personas (Snarky Senior Engineer, Pragmatic Architect, Security Sentinel, FinOps Optimizer, Database Architect, and 18 more) that collaborate to provide nuanced, multi-perspective engineering guidance.
 
 Sensei transforms your engineering standards from passive documentation into an active mentor that injects relevant guidelines **before** Claude reasons, maintaining session memory of architectural decisions.
 
@@ -205,6 +205,24 @@ Claude: [writes code that follows standards]
 
 ## ⚡ Key Features
 
+### v0.6.0 - Granular Persona Content Access (Option B Architecture) 🎭
+
+- 🔧 **Fixed Critical Bug**: Orchestrator was returning placeholder text instead of real analysis
+- 🏗️ **New Architecture**: MCP as content provider (not analysis engine)
+  - MCP provides persona SKILL.md content
+  - Claude (calling LLM) performs analysis using that content
+  - Mirrors `.claude/skills/` pattern for consistency
+- 🛠️ **4 New Granular Tools**:
+  - `get_persona_content()` - Returns full SKILL.md for a specific persona
+  - `suggest_personas_for_query()` - Intelligent persona selection with relevance scores
+  - `get_session_context()` - Returns session memory (constraints, decisions, patterns) as JSON
+  - `record_consultation()` - Records consultations after Claude performs analysis
+- 📊 **Benefits**:
+  - No LLM needed in MCP (no API keys, no costs, no latency)
+  - Claude does what it's best at (analysis)
+  - Predictable, deterministic MCP behavior
+  - Extensible (just add SKILL.md files)
+
 ### v0.5.0 - Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise 🚀
 
 - 🔍 **Interactive Persona Discovery** - Find the right expert faster:
@@ -320,11 +338,126 @@ package.json, Gemfile, **Cargo.toml**, **go.mod**, requirements.txt, **Pipfile**
 
 ## 🛠️ Usage
 
-Sensei provides **16 MCP tools** (2 new in v0.5.0, 3 in v0.4.0, 3 in v0.3.0) + **CLI demo mode**:
+> **📖 NEW: [Complete Usage Guide with Real-World Examples](docs/USAGE_GUIDE.md)**
+>
+> See detailed use cases including API design review, production crisis response, cost optimization, code review, and session-aware architecture decisions.
 
-### NEW v0.5.0 - Enhanced Discovery & Team Merge
+Sensei provides **20 MCP tools** (4 new in v0.6.0, 2 in v0.5.0, 3 in v0.4.0, 3 in v0.3.0) + **CLI demo mode**:
 
-#### CLI Demo Mode (NEW)
+### NEW v0.6.0 - Granular Persona Content Tools
+
+#### 1. get_persona_content (NEW)
+
+Get full SKILL.md content for a specific persona. Claude uses this content to analyze queries from that persona's perspective.
+
+```python
+# Get full Security Sentinel content
+content = get_persona_content(
+  persona_name="security-sentinel",
+  include_metadata=True  # Optional: includes description and expertise
+)
+# Returns: Complete SKILL.md with principles, personality, expertise, guidelines
+
+# Claude then uses this content as context to analyze your query
+# Example workflow:
+# 1. Claude suggests personas → ["security-sentinel", "api-platform-engineer"]
+# 2. Claude gets content for each → Full SKILL.md files
+# 3. Claude analyzes from each perspective using the content
+# 4. Claude synthesizes all perspectives into recommendation
+```
+
+#### 2. suggest_personas_for_query (NEW)
+
+Intelligent persona selection based on query analysis with relevance scores and rationale.
+
+```python
+# Get persona suggestions for a query
+suggestions = suggest_personas_for_query(
+  query="How should we handle authentication for our API?",
+  max_suggestions=5,  # Maximum number of suggestions (default: 5)
+  context_hint="SECURITY"  # Optional: force specific context
+)
+# Returns JSON:
+# {
+#   "query": "How should we handle authentication...",
+#   "detected_context": "SECURITY",
+#   "suggestions": [
+#     {
+#       "name": "security-sentinel",
+#       "display_name": "Security Sentinel",
+#       "relevance": 0.95,
+#       "rationale": "Expert in authentication, security"
+#     },
+#     {
+#       "name": "api-platform-engineer",
+#       "display_name": "API Platform Engineer",
+#       "relevance": 0.82,
+#       "rationale": "Expert in API design, contracts"
+#     }
+#   ]
+# }
+
+# Auto-detect context from query
+suggest_personas_for_query(
+  query="Our AWS bill is too high",
+  max_suggestions=3
+)
+# Returns: finops-optimizer, pragmatic-architect, site-reliability-engineer
+```
+
+#### 3. get_session_context (NEW)
+
+Get session memory (constraints, decisions, patterns) as JSON for context-aware analysis.
+
+```python
+# Get full session context
+context = get_session_context(
+  session_id="saas-backend",
+  project_root="/path/to/repo"  # Optional: for project-local sessions
+)
+# Returns JSON:
+# {
+#   "session_id": "saas-backend",
+#   "active_constraints": ["AWS only", "Python 3.11+", "PostgreSQL"],
+#   "patterns_agreed": ["Use FastAPI", "JWT auth"],
+#   "recent_decisions": [
+#     {
+#       "id": "dec-001",
+#       "category": "architecture",
+#       "description": "Use PostgreSQL for primary data store",
+#       "rationale": "Team expertise, ACID guarantees",
+#       "timestamp": "2025-01-23T10:30:00"
+#     }
+#   ]
+# }
+
+# Claude includes this context when analyzing to ensure consistency
+```
+
+#### 4. record_consultation (NEW)
+
+Record consultations in session history after Claude performs analysis.
+
+```python
+# After Claude analyzes using persona content
+record_consultation(
+  query="Should we migrate to microservices?",
+  personas_used=["pragmatic-architect", "site-reliability-engineer", "finops-optimizer"],
+  session_id="saas-backend",
+  project_root="/path/to/repo",  # Optional
+  synthesis="[Claude's complete analysis and recommendation]"  # Optional
+)
+# Returns: "✅ Consultation recorded: consult_42"
+
+# This consultation is now in session history for:
+# - Analytics (get_session_insights)
+# - Export (export_session_summary)
+# - Future context
+```
+
+### v0.5.0 - Enhanced Discovery & Team Merge
+
+#### CLI Demo Mode
 
 Interactive walkthrough of Sensei's multi-persona capabilities.
 
@@ -340,7 +473,7 @@ sensei-mcp --demo
 # - Code Quality (technical debt)
 ```
 
-#### 1. merge_sessions (NEW)
+#### 5. merge_sessions
 
 Merge multiple developer sessions with intelligent conflict resolution.
 
@@ -363,7 +496,7 @@ merge_sessions(
 )
 ```
 
-#### 2. compare_sessions (NEW)
+#### 6. compare_sessions
 
 Compare two sessions side-by-side before merging.
 
@@ -379,7 +512,7 @@ compare_sessions(
 
 ### v0.4.0 Tools - Analytics & Collaboration
 
-#### 3. get_session_insights
+#### 7. get_session_insights
 
 Get data-driven insights into persona usage, consultation patterns, and decision velocity.
 
@@ -400,7 +533,7 @@ get_session_insights(
 )
 ```
 
-#### 4. export_consultation
+#### 8. export_consultation
 
 Export a single consultation as a shareable report.
 
@@ -421,7 +554,7 @@ export_consultation(
 )
 ```
 
-#### 5. export_session_summary
+#### 9. export_session_summary
 
 Export comprehensive ADRs and session summaries for team sharing.
 
@@ -445,7 +578,9 @@ export_session_summary(
 
 ### v0.3.0 Tools - Multi-Persona Orchestrator
 
-#### 6. get_engineering_guidance (Primary Tool)
+> **Note:** `get_engineering_guidance()` and `consult_skill()` will be deprecated in v0.7.0. Use the new v0.6.0 granular tools instead (`get_persona_content`, `suggest_personas_for_query`, `get_session_context`, `record_consultation`).
+
+#### 10. get_engineering_guidance
 
 Get collaborative multi-persona guidance on any engineering question.
 
@@ -479,7 +614,7 @@ get_engineering_guidance(
 )
 ```
 
-#### 7. consult_skill
+#### 11. consult_skill
 
 Consult a single persona directly for targeted expertise.
 
@@ -491,7 +626,7 @@ consult_skill(
 )
 ```
 
-#### 8. list_available_skills
+#### 12. list_available_skills
 
 Discover all 23 available personas organized by category.
 
@@ -512,7 +647,7 @@ list_available_skills(category="specialized")  # Security, FinOps, Database Arch
 
 ### Core Tools (v0.2.x) - Still Supported
 
-#### 9. get_engineering_context (Legacy)
+#### 13. get_engineering_context (Legacy)
 
 Smart context injection - loads relevant standards based on files and operation.
 
@@ -529,7 +664,7 @@ get_engineering_context(
 # Returns: API contracts, security, multi-tenancy, idempotency standards
 ```
 
-#### 10. record_decision
+#### 14. record_decision
 
 Save architectural decisions to prevent re-litigation.
 
@@ -542,7 +677,7 @@ record_decision(
 )
 ```
 
-#### 11. validate_against_standards
+#### 15. validate_against_standards
 
 Pre-implementation validation check.
 
@@ -554,7 +689,7 @@ validate_against_standards(
 )
 ```
 
-#### 12. get_session_summary
+#### 16. get_session_summary
 
 Review all decisions and constraints for current project.
 
@@ -562,7 +697,7 @@ Review all decisions and constraints for current project.
 get_session_summary(session_id="saas-backend")
 ```
 
-#### 13. list_sessions
+#### 17. list_sessions
 
 Manage multiple projects with separate session states.
 
@@ -570,7 +705,7 @@ Manage multiple projects with separate session states.
 list_sessions()
 ```
 
-#### 14. query_specific_standard
+#### 18. query_specific_standard
 
 Direct access to specific rulebook sections.
 
@@ -581,7 +716,7 @@ query_specific_standard(
 )
 ```
 
-#### 15. check_consistency
+#### 19. check_consistency
 
 Validate proposed changes against past decisions.
 
@@ -592,7 +727,7 @@ check_consistency(
 )
 ```
 
-#### 16. analyze_changes
+#### 20. analyze_changes
 
 Automatically infer context from staged git changes (enhanced in v0.5.0 with persona suggestions).
 
