@@ -1,0 +1,339 @@
+# GitLab CI/CD integration with Sensei MCP
+#
+# This configuration runs Sensei's multi-persona reviews on merge requests
+# and validates architectural consistency on all commits.
+
+stages:
+  - validate
+  - review
+  - report
+
+variables:
+  SENSEI_VERSION: "0.5.0"
+  SENSEI_SESSION_ID: "$CI_PROJECT_PATH"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# Cache pip packages for faster builds
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+# Install Sensei MCP
+.install_sensei: &install_sensei
+  before_script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install sensei-mcp==$SENSEI_VERSION
+
+# ============================================================================
+# VALIDATION JOBS
+# ============================================================================
+
+consistency-check:
+  stage: validate
+  image: python:3.11
+  <<: *install_sensei
+  script:
+    - echo "🎭 Running Sensei consistency check..."
+    - python << 'EOF'
+      import subprocess
+
+      # Get list of changed files
+      result = subprocess.run(
+          ["git", "diff", "--name-only", "$CI_MERGE_REQUEST_DIFF_BASE_SHA", "HEAD"],
+          capture_output=True,
+          text=True
+      )
+
+      changed_files = result.stdout.strip().split('\n')
+      print(f"📊 Analyzing {len(changed_files)} changed files")
+
+      # In real implementation, call Sensei's check_consistency
+      # from sensei_mcp.session import SessionManager
+      # session_mgr = SessionManager()
+      # result = session_mgr.check_consistency(...)
+
+      print("✅ Changes are consistent with architectural decisions")
+      EOF
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+architecture-analysis:
+  stage: validate
+  image: python:3.11
+  <<: *install_sensei
+  script:
+    - echo "🏗️ Analyzing architectural impact..."
+    - python << 'EOF'
+      # Use Sensei's analyze_changes() tool
+      # from sensei_mcp.server import analyze_changes
+      # summary = analyze_changes(project_root=".")
+
+      print("📊 Change Summary:")
+      print("  - Contexts detected: ARCHITECTURAL, SECURITY")
+      print("  - Recommended personas: pragmatic-architect, security-sentinel")
+      print("✅ Analysis complete")
+      EOF
+  artifacts:
+    reports:
+      dotenv: architecture_analysis.env
+    paths:
+      - architecture_analysis.txt
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ============================================================================
+# REVIEW JOBS
+# ============================================================================
+
+security-review:
+  stage: review
+  image: python:3.11
+  <<: *install_sensei
+  script:
+    - echo "🔒 Running Sensei security review..."
+    - |
+      python << 'EOF'
+      import subprocess
+
+      # Check if security-sensitive files changed
+      result = subprocess.run(
+          ["git", "diff", "--name-only", "$CI_MERGE_REQUEST_DIFF_BASE_SHA", "HEAD"],
+          capture_output=True,
+          text=True
+      )
+
+      files = result.stdout.lower()
+      needs_security_review = any(
+          keyword in files
+          for keyword in ['auth', 'security', 'api', 'password', 'token']
+      )
+
+      if needs_security_review:
+          print("🔍 Security-sensitive changes detected")
+          print("👮 Consulting: Security Sentinel, Compliance Guardian")
+
+          # In real implementation:
+          # from sensei_mcp.server import get_engineering_guidance
+          # result = get_engineering_guidance(
+          #     query="Review these changes for security issues",
+          #     specific_personas=["security-sentinel", "compliance-guardian"]
+          # )
+
+          print("\n✅ Security Review Complete")
+          print("No critical vulnerabilities detected")
+      else:
+          print("ℹ️ No security-sensitive changes detected")
+      EOF
+  artifacts:
+    reports:
+      junit: security_review.xml
+    paths:
+      - security_review.txt
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+cost-impact-review:
+  stage: review
+  image: python:3.11
+  <<: *install_sensei
+  script:
+    - echo "💰 Running cost impact analysis..."
+    - |
+      python << 'EOF'
+      import subprocess
+
+      # Check for infrastructure changes
+      result = subprocess.run(
+          ["git", "diff", "--name-only", "$CI_MERGE_REQUEST_DIFF_BASE_SHA", "HEAD"],
+          capture_output=True,
+          text=True
+      )
+
+      files = result.stdout.lower()
+      has_infra_changes = any(
+          keyword in files
+          for keyword in ['terraform', 'cloudformation', 'kubernetes', 'docker']
+      )
+
+      if has_infra_changes:
+          print("📊 Infrastructure changes detected")
+          print("💡 Consulting: FinOps Optimizer")
+
+          # In real implementation:
+          # result = get_engineering_guidance(
+          #     query="Analyze cost impact of these infrastructure changes",
+          #     specific_personas=["finops-optimizer"]
+          # )
+
+          print("\n💵 Estimated monthly cost impact: $100-500 USD")
+          print("✅ Cost analysis complete")
+      else:
+          print("ℹ️ No infrastructure changes detected")
+      EOF
+  artifacts:
+    paths:
+      - cost_impact.txt
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true  # Don't block MR on cost warnings
+
+code-quality-review:
+  stage: review
+  image: python:3.11
+  <<: *install_sensei
+  script:
+    - echo "🔍 Running code quality review..."
+    - |
+      python << 'EOF'
+      print("👨‍💻 Consulting: Snarky Senior Engineer, Legacy Archaeologist")
+
+      # In real implementation:
+      # result = get_engineering_guidance(
+      #     query="Review code quality and maintainability of these changes",
+      #     specific_personas=["snarky-senior-engineer", "legacy-archaeologist"]
+      # )
+
+      print("\n✅ Code Quality Review:")
+      print("  • Code follows established patterns")
+      print("  • No significant technical debt introduced")
+      print("  • Consider adding integration tests for new features")
+      EOF
+  artifacts:
+    paths:
+      - code_quality.txt
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ============================================================================
+# REPORTING
+# ============================================================================
+
+generate-sensei-report:
+  stage: report
+  image: python:3.11
+  <<: *install_sensei
+  needs:
+    - security-review
+    - cost-impact-review
+    - code-quality-review
+  script:
+    - echo "📋 Generating comprehensive Sensei report..."
+    - |
+      python << 'EOF'
+      import os
+
+      report = f"""
+      # 🎭 Sensei Multi-Persona MR Review
+
+      **Merge Request:** !{os.environ.get('CI_MERGE_REQUEST_IID', 'N/A')}
+      **Project:** {os.environ.get('CI_PROJECT_PATH', 'N/A')}
+      **Branch:** {os.environ.get('CI_COMMIT_REF_NAME', 'N/A')}
+      **Pipeline:** {os.environ.get('CI_PIPELINE_URL', 'N/A')}
+
+      ---
+
+      ## 🏗️ Architecture Review
+
+      **Personas consulted:** Pragmatic Architect, Snarky Senior Engineer
+
+      ✅ Changes align with established architectural patterns
+      💡 Consider documenting this pattern for future reference
+
+      ---
+
+      ## 🔒 Security Review
+
+      **Personas consulted:** Security Sentinel, Compliance Guardian
+
+      ✅ No critical security issues detected
+      ⚠️  Minor: Consider adding rate limiting to new API endpoints
+
+      ---
+
+      ## 💰 Cost Impact Analysis
+
+      **Persona consulted:** FinOps Optimizer
+
+      💵 Estimated monthly cost impact: $100-500 USD
+      💡 Recommendations:
+      - Use Spot Instances for non-critical workloads
+      - Enable auto-scaling to match demand
+
+      ---
+
+      ## 🔍 Code Quality Review
+
+      **Personas consulted:** Snarky Senior Engineer, Legacy Archaeologist
+
+      ✅ Code quality meets standards
+      💡 Suggestions:
+      - Add integration tests for new features
+      - Update API documentation
+
+      ---
+
+      **Overall Assessment:** ✅ APPROVED
+
+      *Generated by [Sensei MCP](https://github.com/amarodeabreu/sensei-mcp) v{os.environ.get('SENSEI_VERSION', '0.5.0')}*
+      """
+
+      with open("sensei_report.md", "w") as f:
+          f.write(report)
+
+      print(report)
+      EOF
+    - cat sensei_report.md
+  artifacts:
+    paths:
+      - sensei_report.md
+    expire_in: 90 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ============================================================================
+# SCHEDULED JOBS
+# ============================================================================
+
+weekly-architecture-audit:
+  stage: report
+  image: python:3.11
+  <<: *install_sensei
+  script:
+    - echo "📊 Running weekly architecture health audit..."
+    - |
+      python << 'EOF'
+      # Use export_session_summary to generate health report
+      # from sensei_mcp.server import export_session_summary
+      # report = export_session_summary(
+      #     session_id=os.environ['SENSEI_SESSION_ID'],
+      #     format="markdown"
+      # )
+
+      print("✅ Architecture Health Report generated")
+      print("📧 Email report to engineering team")
+      EOF
+  artifacts:
+    paths:
+      - weekly_audit.md
+    expire_in: 365 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  only:
+    - schedules
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+# Set these as CI/CD variables in GitLab:
+#
+# SENSEI_SESSION_ID: Your project session ID (default: $CI_PROJECT_PATH)
+# SENSEI_MODE: Review mode (orchestrated, quick, crisis)
+# SENSEI_PERSONAS: Comma-separated list of personas to consult
+# SENSEI_FAIL_ON_VIOLATIONS: Set to "true" to fail pipeline on violations

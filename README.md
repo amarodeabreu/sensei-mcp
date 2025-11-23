@@ -6,11 +6,13 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-> Multi-persona engineering mentor with 22 specialized AI skills orchestrating collaborative guidance
+> Multi-persona engineering mentor with 23 specialized AI skills orchestrating collaborative guidance
 
-**NEW in v0.4.0:** Analytics & Team Collaboration - Track persona effectiveness, export session summaries as ADRs, and share engineering decisions with your team.
+**NEW in v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona (23rd expert).
 
-**v0.3.0:** Sensei features a **Skill Orchestrator** with 22 specialized personas (Snarky Senior Engineer, Pragmatic Architect, Security Sentinel, FinOps Optimizer, and 18 more) that collaborate to provide nuanced, multi-perspective engineering guidance.
+**v0.4.0:** Analytics & Team Collaboration - Track persona effectiveness, export session summaries as ADRs, and share engineering decisions with your team.
+
+**v0.3.0:** Sensei features a **Skill Orchestrator** with specialized personas (Snarky Senior Engineer, Pragmatic Architect, Security Sentinel, FinOps Optimizer, Database Architect, and 18 more) that collaborate to provide nuanced, multi-perspective engineering guidance.
 
 Sensei transforms your engineering standards from passive documentation into an active mentor that injects relevant guidelines **before** Claude reasons, maintaining session memory of architectural decisions.
 
@@ -203,6 +205,30 @@ Claude: [writes code that follows standards]
 
 ## ⚡ Key Features
 
+### v0.5.0 - Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise 🚀
+
+- 🔍 **Interactive Persona Discovery** - Find the right expert faster:
+  - Enhanced `list_available_skills()` with 3 format modes (standard, detailed, quick)
+  - CLI demo mode (`sensei-mcp --demo`) with 5 real-world scenarios
+  - Intelligent context hints when <2 personas selected
+  - Technology keyword detection (database, api, security, frontend, mobile, ml)
+- 🔧 **CI/CD Integration Pack** - Integrate Sensei into your development workflow:
+  - GitHub Actions workflows for PR reviews and architecture checks
+  - Pre-commit hooks (consistency, security, cost analysis)
+  - GitLab CI pipeline with 3-stage validation
+  - Enhanced `analyze_changes()` with persona suggestions
+  - Comprehensive integration guide (500+ lines)
+- 🤝 **Session Merge & Team Sync** - Collaborate on architectural decisions:
+  - Merge multiple developer sessions with conflict resolution
+  - 4 merge strategies (latest, oldest, all, manual)
+  - Session comparison for side-by-side analysis
+  - Attribution tracking for all decisions
+- 🗄️ **Database Architect Persona** - 23rd specialized expert joins the team:
+  - Schema design and normalization expertise
+  - Query optimization and indexing strategies
+  - Migration planning and scalability patterns
+  - Multi-tenancy architecture guidance
+
 ### v0.4.0 - Analytics & Team Collaboration 📊
 
 - 📊 **Session Analytics** - Data-driven insights into persona usage and decision patterns:
@@ -224,11 +250,11 @@ Claude: [writes code that follows standards]
 
 ### v0.3.0 - Multi-Persona Orchestrator 🎭
 
-- 🎭 **22 Specialized Personas** - Skill Orchestrator coordinates expert perspectives:
+- 🎭 **23 Specialized Personas** - Skill Orchestrator coordinates expert perspectives:
   - **Core Skills:** Snarky Senior Engineer, Pragmatic Architect, Legacy Archaeologist
-  - **Specialized Skills:** Security Sentinel, FinOps Optimizer, Performance Engineer, Product Engineering Lead, API Architect
+  - **Specialized Skills:** Security Sentinel, FinOps Optimizer, Database Architect, Performance Engineer, Product Engineering Lead, API Architect
   - **Operations:** Incident Commander, SRE, Executive Liaison, Compliance Guardian
-  - **Plus 10+ more:** DevX Advocate, Tech Debt Wrangler, Data Platform Engineer, Frontend Performance, Staff+ Mentor, etc.
+  - **Plus 12+ more:** DevX Advocate, Tech Debt Wrangler, Data Platform Engineer, Frontend Performance, Staff+ Mentor, Mobile Platform Engineer, etc.
 - 🧠 **Context Detection** - Intelligently routes queries to relevant personas (CRISIS, SECURITY, POLITICAL, ARCHITECTURAL, COST, TEAM, TECHNICAL)
 - 🤝 **Collaborative Synthesis** - Multiple perspectives with conflict resolution and consensus building
 - 📊 **Consultation Tracking** - Session memory records which personas were consulted and why
@@ -294,11 +320,66 @@ package.json, Gemfile, **Cargo.toml**, **go.mod**, requirements.txt, **Pipfile**
 
 ## 🛠️ Usage
 
-Sensei provides **13 MCP tools** (3 new in v0.4.0, 3 in v0.3.0):
+Sensei provides **16 MCP tools** (2 new in v0.5.0, 3 in v0.4.0, 3 in v0.3.0) + **CLI demo mode**:
 
-### NEW v0.4.0 Tools - Analytics & Collaboration
+### NEW v0.5.0 - Enhanced Discovery & Team Merge
 
-#### 1. get_session_insights (NEW)
+#### CLI Demo Mode (NEW)
+
+Interactive walkthrough of Sensei's multi-persona capabilities.
+
+```bash
+# Run the interactive demo
+sensei-mcp --demo
+
+# Shows 5 real-world scenarios:
+# - Architecture Decision (microservices migration)
+# - Production Crisis (database outage)
+# - Security Review (authentication audit)
+# - Cost Optimization (cloud spending)
+# - Code Quality (technical debt)
+```
+
+#### 1. merge_sessions (NEW)
+
+Merge multiple developer sessions with intelligent conflict resolution.
+
+```python
+# Merge two developer sessions
+merge_sessions(
+  session_ids=["alice-frontend", "bob-backend"],
+  target_session_id="sprint-23",
+  conflict_strategy="latest",  # "latest", "oldest", "all", "manual"
+  session_id="sprint-23",
+  project_root="/path/to/repo"
+)
+# Returns: MergeResult with decisions merged, conflicts detected, attribution tracking
+
+# Manual conflict resolution
+merge_sessions(
+  session_ids=["alice-session", "bob-session"],
+  target_session_id="team-session",
+  conflict_strategy="manual"  # Returns conflicts for human resolution
+)
+```
+
+#### 2. compare_sessions (NEW)
+
+Compare two sessions side-by-side before merging.
+
+```python
+compare_sessions(
+  session_a_id="alice-session",
+  session_b_id="bob-session",
+  session_id="default",
+  project_root="/path/to/repo"
+)
+# Returns: Markdown comparison with decisions, constraints, patterns diff
+```
+
+### v0.4.0 Tools - Analytics & Collaboration
+
+#### 3. get_session_insights
 
 Get data-driven insights into persona usage, consultation patterns, and decision velocity.
 
@@ -319,7 +400,7 @@ get_session_insights(
 )
 ```
 
-#### 2. export_consultation (NEW)
+#### 4. export_consultation
 
 Export a single consultation as a shareable report.
 
@@ -340,7 +421,7 @@ export_consultation(
 )
 ```
 
-#### 3. export_session_summary (NEW)
+#### 5. export_session_summary
 
 Export comprehensive ADRs and session summaries for team sharing.
 
@@ -364,7 +445,7 @@ export_session_summary(
 
 ### v0.3.0 Tools - Multi-Persona Orchestrator
 
-#### 4. get_engineering_guidance (Primary Tool)
+#### 6. get_engineering_guidance (Primary Tool)
 
 Get collaborative multi-persona guidance on any engineering question.
 
@@ -398,7 +479,7 @@ get_engineering_guidance(
 )
 ```
 
-#### 5. consult_skill
+#### 7. consult_skill
 
 Consult a single persona directly for targeted expertise.
 
@@ -410,22 +491,28 @@ consult_skill(
 )
 ```
 
-#### 6. list_available_skills
+#### 8. list_available_skills
 
-Discover all 22 available personas organized by category.
+Discover all 23 available personas organized by category.
 
 ```python
-# List all personas
+# List all personas (standard format)
 list_available_skills()
+
+# Detailed format with examples and metadata
+list_available_skills(format="detailed")
+
+# Quick format (names only)
+list_available_skills(format="quick")
 
 # List by category
 list_available_skills(category="operations")  # SRE, Incident Commander, etc.
-list_available_skills(category="specialized")  # Security, FinOps, Performance, etc.
+list_available_skills(category="specialized")  # Security, FinOps, Database Architect, etc.
 ```
 
 ### Core Tools (v0.2.x) - Still Supported
 
-#### 7. get_engineering_context (Legacy)
+#### 9. get_engineering_context (Legacy)
 
 Smart context injection - loads relevant standards based on files and operation.
 
@@ -442,7 +529,7 @@ get_engineering_context(
 # Returns: API contracts, security, multi-tenancy, idempotency standards
 ```
 
-#### 8. record_decision
+#### 10. record_decision
 
 Save architectural decisions to prevent re-litigation.
 
@@ -455,7 +542,7 @@ record_decision(
 )
 ```
 
-#### 9. validate_against_standards
+#### 11. validate_against_standards
 
 Pre-implementation validation check.
 
@@ -467,7 +554,7 @@ validate_against_standards(
 )
 ```
 
-#### 10. get_session_summary
+#### 12. get_session_summary
 
 Review all decisions and constraints for current project.
 
@@ -475,7 +562,7 @@ Review all decisions and constraints for current project.
 get_session_summary(session_id="saas-backend")
 ```
 
-#### 11. list_sessions
+#### 13. list_sessions
 
 Manage multiple projects with separate session states.
 
@@ -483,7 +570,7 @@ Manage multiple projects with separate session states.
 list_sessions()
 ```
 
-#### 12. query_specific_standard
+#### 14. query_specific_standard
 
 Direct access to specific rulebook sections.
 
@@ -494,7 +581,7 @@ query_specific_standard(
 )
 ```
 
-#### 13. check_consistency
+#### 15. check_consistency
 
 Validate proposed changes against past decisions.
 
@@ -505,12 +592,13 @@ check_consistency(
 )
 ```
 
-#### 14. analyze_changes
+#### 16. analyze_changes
 
-Automatically infer context from staged git changes.
+Automatically infer context from staged git changes (enhanced in v0.5.0 with persona suggestions).
 
 ```python
 analyze_changes(project_root="/path/to/repo")
+# Returns: File changes, diff stats, and suggested personas based on file patterns
 ```
 
 ---

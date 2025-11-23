@@ -19,7 +19,22 @@ class ConcretePersona(BasePersona):
     The analyze() method would be enhanced by the orchestrator
     with actual LLM-based analysis using the skill content.
     """
-    pass
+
+    def __init__(self, skill_data: Dict):
+        super().__init__(skill_data)
+        self._category = skill_data.get('metadata', {}).get('category', self._infer_category())
+
+    def _infer_category(self) -> str:
+        """Infer category from PersonaRegistry.CATEGORIES."""
+        for category, names in PersonaRegistry.CATEGORIES.items():
+            if self.name in names:
+                return category
+        return 'unknown'
+
+    @property
+    def category(self) -> str:
+        """Category this persona belongs to (core, specialized, operations, etc.)"""
+        return self._category
 
 
 class PersonaRegistry:
@@ -33,8 +48,8 @@ class PersonaRegistry:
     CATEGORIES = {
         'core': ['snarky-senior-engineer', 'pragmatic-architect', 'legacy-archaeologist'],
         'specialized': [
-            'api-platform-engineer', 'data-engineer', 'frontend-ux-specialist',
-            'ml-pragmatist', 'mobile-platform-engineer'
+            'api-platform-engineer', 'data-engineer', 'database-architect',
+            'frontend-ux-specialist', 'ml-pragmatist', 'mobile-platform-engineer'
         ],
         'operations': [
             'site-reliability-engineer', 'incident-commander', 'observability-engineer'
@@ -152,25 +167,37 @@ class PersonaRegistry:
 
         return list(self._skill_data.keys())
 
-    def search_by_expertise(self, keywords: List[str]) -> List[BasePersona]:
+    def search_by_expertise(self, keywords) -> List[BasePersona]:
         """
         Search for personas by expertise keywords.
 
         Args:
-            keywords: List of keywords to match against expertise areas
+            keywords: String or list of keywords to match against expertise areas
 
         Returns:
             List of personas sorted by relevance
         """
+        # Convert string to list
+        if isinstance(keywords, str):
+            keywords = [keywords]
+
         all_personas = self.get_all()
 
-        # Score each persona
+        # Score each persona by matching keywords in expertise areas OR description
         scored = []
         for persona in all_personas.values():
-            score = sum(
+            # Check expertise areas
+            expertise_matches = sum(
                 1 for keyword in keywords
-                if keyword.lower() in [e.lower() for e in persona.expertise_areas]
+                if any(keyword.lower() in e.lower() for e in persona.expertise_areas)
             )
+            # Check description
+            description_matches = sum(
+                1 for keyword in keywords
+                if keyword.lower() in persona.description.lower()
+            )
+            score = expertise_matches + description_matches
+
             if score > 0:
                 scored.append((score, persona))
 

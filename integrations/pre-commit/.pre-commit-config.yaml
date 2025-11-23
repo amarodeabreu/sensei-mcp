@@ -1,0 +1,78 @@
+# Pre-commit hooks with Sensei MCP integration
+#
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Python code quality
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=100', '--extend-ignore=E203,W503']
+
+  # Sensei MCP Integration
+  - repo: local
+    hooks:
+      # Check consistency with architecture decisions
+      - id: sensei-consistency-check
+        name: Sensei Consistency Check
+        entry: bash -c 'python integrations/pre-commit/sensei_consistency_check.py'
+        language: system
+        pass_filenames: false
+        stages: [commit]
+
+      # Security review for sensitive files
+      - id: sensei-security-review
+        name: Sensei Security Review
+        entry: bash -c 'python integrations/pre-commit/sensei_security_review.py'
+        language: system
+        files: \.(py|js|ts|tsx|jsx)$
+        stages: [commit]
+
+      # Cost impact analysis for infrastructure changes
+      - id: sensei-cost-check
+        name: Sensei Cost Impact Check
+        entry: bash -c 'python integrations/pre-commit/sensei_cost_check.py'
+        language: system
+        files: (terraform|cloudformation|kubernetes|docker-compose)\.(tf|yaml|yml|json)$
+        stages: [commit]
+
+# Configuration for Sensei hooks
+# Create a .sensei.yml in your repo root:
+#
+# session_id: "my-project"
+# mode: "quick"  # or "orchestrated" for full review
+# fail_on_violations: true
+# personas:
+#   security:
+#     - security-sentinel
+#     - compliance-guardian
+#   architecture:
+#     - pragmatic-architect
+#     - snarky-senior-engineer
+#   cost:
+#     - finops-optimizer

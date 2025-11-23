@@ -21,6 +21,7 @@ from .personas.registry import PersonaRegistry
 from .orchestrator import SkillOrchestrator
 from .analytics import SessionAnalyzer
 from .exporter import ConsultationExporter, SessionExporter
+from .merge import SessionMerger, format_merge_result, format_comparison
 
 # Initialize MCP server
 mcp = FastMCP("sensei")
@@ -372,20 +373,85 @@ def check_consistency(
     return "".join(report)
 
 
+def _suggest_personas_for_contexts(contexts, files):
+    """Suggest relevant personas based on detected contexts and file patterns (v0.5.0)."""
+    suggestions = []
+
+    # Map contexts to personas
+    context_persona_map = {
+        'ARCHITECTURAL': [
+            ('pragmatic-architect', 'System design and scalability review'),
+            ('snarky-senior-engineer', 'Pragmatic pattern validation'),
+        ],
+        'SECURITY': [
+            ('security-sentinel', 'Security vulnerability analysis'),
+            ('compliance-guardian', 'Regulatory compliance check'),
+        ],
+        'COST': [
+            ('finops-optimizer', 'Cloud cost impact analysis'),
+        ],
+        'CRISIS': [
+            ('incident-commander', 'Production impact assessment'),
+            ('site-reliability-engineer', 'Reliability and monitoring review'),
+        ],
+    }
+
+    # File pattern-based suggestions
+    file_patterns = {
+        'api': ('api-platform-engineer', 'API design and contract review'),
+        'test': ('qa-automation-engineer', 'Test coverage and quality'),
+        'database': ('data-engineer', 'Database schema and query optimization'),
+        'migration': ('data-engineer', 'Migration safety and rollback strategy'),
+        'frontend': ('frontend-ux-specialist', 'UX and accessibility review'),
+        'mobile': ('mobile-platform-engineer', 'Mobile platform best practices'),
+        'terraform': ('finops-optimizer', 'Infrastructure cost optimization'),
+        'docker': ('platform-builder', 'Container and deployment review'),
+        'kubernetes': ('site-reliability-engineer', 'K8s reliability and scaling'),
+    }
+
+    # Add suggestions based on contexts
+    for ctx in contexts:
+        ctx_value = ctx.value if hasattr(ctx, 'value') else str(ctx)
+        if ctx_value in context_persona_map:
+            suggestions.extend(context_persona_map[ctx_value])
+
+    # Add suggestions based on file patterns
+    files_lower = ' '.join(files).lower()
+    for pattern, (persona, reason) in file_patterns.items():
+        if pattern in files_lower:
+            suggestions.append((persona, reason))
+
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_suggestions = []
+    for persona, reason in suggestions:
+        if persona not in seen:
+            seen.add(persona)
+            unique_suggestions.append((persona, reason))
+
+    return unique_suggestions[:5]  # Top 5 suggestions
+
+
 @mcp.tool()
-def analyze_changes(project_root: str) -> str:
+def analyze_changes(
+    project_root: str,
+    include_diff_stats: bool = True,
+    suggest_personas: bool = True
+) -> str:
     """
-    Analyze staged git changes to identify relevant engineering contexts.
-    
+    Analyze staged git changes to identify relevant engineering contexts (v0.5.0 enhanced).
+
     Args:
         project_root: Absolute path to the project root
-        
+        include_diff_stats: Include line change statistics (additions/deletions)
+        suggest_personas: Suggest relevant personas based on change context
+
     Returns:
-        Summary of changed files and their inferred context types
+        Summary of changed files, contexts, and recommended personas for review
     """
     if not project_root:
         return "❌ Project root is required for git analysis."
-        
+
     try:
         # Run git diff --name-only --staged
         result = subprocess.run(
@@ -395,7 +461,7 @@ def analyze_changes(project_root: str) -> str:
             text=True,
             check=False
         )
-        
+
         # If no staged changes, try HEAD (last commit)
         if not result.stdout.strip():
              result = subprocess.run(
@@ -405,32 +471,74 @@ def analyze_changes(project_root: str) -> str:
                 text=True,
                 check=False
             )
-            
+
         files = result.stdout.strip().splitlines()
-        
+
         if not files:
             return "No changed files found (checked staged and HEAD)."
-            
+
+        # Get diff stats if requested (v0.5.0)
+        diff_stats = None
+        if include_diff_stats:
+            stats_result = subprocess.run(
+                ["git", "diff", "--staged", "--stat"],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if not stats_result.stdout.strip():
+                stats_result = subprocess.run(
+                    ["git", "diff", "HEAD", "--stat"],
+                    cwd=project_root,
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+            diff_stats = stats_result.stdout.strip()
+
         # Infer context for these files
         contexts = ContextInferenceEngine.infer_contexts(file_paths=files)
         section_names = [ctx.value for ctx in contexts]
-        
-        report = ["# 🕵️ Git Change Analysis\n"]
+
+        # Build report
+        report = ["# 🕵️ Git Change Analysis (v0.5.0)\n\n"]
         report.append(f"**Analyzed {len(files)} changed files:**\n")
         for f in files[:10]: # Limit to 10 files
             report.append(f"- `{f}`\n")
         if len(files) > 10:
             report.append(f"...and {len(files)-10} more\n")
-            
+
+        # Add diff stats (v0.5.0)
+        if diff_stats:
+            report.append(f"\n**Change Statistics:**\n```\n{diff_stats}\n```\n")
+
         report.append(f"\n**Inferred Contexts ({len(contexts)}):**\n")
         for ctx in section_names:
             report.append(f"- {ctx}\n")
-            
-        report.append("\n**Recommendation:**\n")
-        report.append(f"Run `get_engineering_context(file_paths={files[:5]})` to load these standards.")
-        
+
+        # Suggest personas based on contexts (v0.5.0)
+        if suggest_personas:
+            persona_suggestions = _suggest_personas_for_contexts(contexts, files)
+            if persona_suggestions:
+                report.append("\n**🎭 Recommended Personas for Review:**\n")
+                for persona, reason in persona_suggestions:
+                    report.append(f"- `{persona}`: {reason}\n")
+
+                # Provide example command
+                persona_list = [p for p, _ in persona_suggestions[:3]]
+                report.append(f"\n**Example Command:**\n")
+                report.append(f"```python\n")
+                report.append(f"get_engineering_guidance(\n")
+                report.append(f'    query="Review these changes for quality and impact",\n')
+                report.append(f"    specific_personas={persona_list}\n")
+                report.append(f")\n```\n")
+
+        report.append("\n**Alternative:**\n")
+        report.append(f"Run `get_engineering_context(file_paths={files[:5]})` to load standards for these contexts.")
+
         return "".join(report)
-        
+
     except Exception as e:
         return f"❌ Error running git analysis: {str(e)}"
 
@@ -438,6 +546,89 @@ def analyze_changes(project_root: str) -> str:
 # ============================================================================
 # v0.3.0 NEW TOOLS - Multi-Persona Orchestration
 # ============================================================================
+
+def _generate_context_hint(query: str, context: str, num_personas: int) -> str:
+    """
+    Generate helpful hints when few personas were selected (v0.5.0).
+
+    Suggests relevant personas based on query keywords and detected context.
+
+    Args:
+        query: User's query
+        context: Detected context type
+        num_personas: Number of personas that were selected
+
+    Returns:
+        Hint string or empty if not applicable
+    """
+    # Only provide hints if very few personas matched
+    if num_personas >= 2:
+        return ""
+
+    # Context-based suggestions
+    context_suggestions = {
+        'SECURITY': ['security-sentinel', 'compliance-guardian', 'api-platform-engineer'],
+        'CRISIS': ['incident-commander', 'site-reliability-engineer', 'executive-liaison'],
+        'ARCHITECTURAL': ['pragmatic-architect', 'snarky-senior-engineer', 'product-engineering-lead'],
+        'COST': ['finops-optimizer', 'site-reliability-engineer', 'pragmatic-architect'],
+        'DATABASE': ['data-engineer', 'pragmatic-architect', 'site-reliability-engineer'],
+        'TECHNICAL': ['snarky-senior-engineer', 'legacy-archaeologist', 'qa-automation-engineer'],
+        'API': ['api-platform-engineer', 'security-sentinel', 'pragmatic-architect'],
+        'FRONTEND': ['frontend-ux-specialist', 'devex-champion', 'qa-automation-engineer'],
+        'MOBILE': ['mobile-platform-engineer', 'frontend-ux-specialist', 'qa-automation-engineer'],
+        'DATA': ['data-engineer', 'pragmatic-architect', 'observability-engineer'],
+        'ML': ['ml-pragmatist', 'data-engineer', 'pragmatic-architect'],
+        'TEAM': ['empathetic-team-lead', 'product-engineering-lead', 'devex-champion'],
+    }
+
+    # Keyword-based detection
+    query_lower = query.lower()
+    keywords_map = {
+        'database': 'DATABASE',
+        'sql': 'DATABASE',
+        'postgres': 'DATABASE',
+        'mongodb': 'DATABASE',
+        'api': 'API',
+        'endpoint': 'API',
+        'rest': 'API',
+        'graphql': 'API',
+        'security': 'SECURITY',
+        'vulnerability': 'SECURITY',
+        'auth': 'SECURITY',
+        'frontend': 'FRONTEND',
+        'react': 'FRONTEND',
+        'vue': 'FRONTEND',
+        'mobile': 'MOBILE',
+        'ios': 'MOBILE',
+        'android': 'MOBILE',
+        'machine learning': 'ML',
+        'model': 'ML',
+        'training': 'ML',
+        'team': 'TEAM',
+        'culture': 'TEAM',
+        'hiring': 'TEAM',
+    }
+
+    # Try to find more specific context from keywords
+    suggested_context = context
+    for keyword, ctx in keywords_map.items():
+        if keyword in query_lower:
+            suggested_context = ctx
+            break
+
+    # Get suggestions for this context
+    suggestions = context_suggestions.get(suggested_context, [])
+
+    if suggestions:
+        hint = f"\n\n💡 **Context Hint:** This looks like a {suggested_context} question. "
+        hint += f"Consider using specific personas:\n"
+        for persona in suggestions[:3]:  # Top 3
+            hint += f"- `{persona}`\n"
+        hint += f"\nUse: `get_engineering_guidance(query=\"...\", specific_personas=[\"persona-name\"])`"
+        return hint
+
+    return ""
+
 
 @mcp.tool()
 def get_engineering_guidance(
@@ -536,7 +727,14 @@ def get_engineering_guidance(
         project_root=project_root
     )
 
-    return result['synthesis']
+    # Generate context hint if few personas were selected (v0.5.0)
+    hint = _generate_context_hint(
+        query=query,
+        context=result['context'],
+        num_personas=len(result['personas_consulted'])
+    )
+
+    return result['synthesis'] + hint
 
 
 @mcp.tool()
@@ -602,34 +800,89 @@ def consult_skill(
 
 
 @mcp.tool()
-def list_available_skills(category: str = None) -> str:
+def list_available_skills(
+    category: str = None,
+    format: str = "standard"
+) -> str:
     """
-    List all available skill personas.
+    List all available skill personas with flexible detail levels.
 
     Args:
         category: Optional filter (core, specialized, operations, security, platform, cost, leadership, meta)
+        format: Output format:
+            - "standard" (default): Name, description, and expertise areas
+            - "detailed": Adds example queries, use cases, and related personas
+            - "quick": One-line quick tips for each persona
 
     Returns:
-        Formatted list of available personas with descriptions
+        Formatted list of available personas
+
+    Examples:
+        # Standard list
+        list_available_skills()
+
+        # Detailed format with examples
+        list_available_skills(format="detailed")
+
+        # Quick reference
+        list_available_skills(format="quick")
+
+        # Specific category
+        list_available_skills(category="operations", format="detailed")
     """
     if category:
         if category not in persona_registry.get_categories():
             available_categories = ", ".join(persona_registry.get_categories().keys())
             return f"❌ Category '{category}' not found.\n\nAvailable categories: {available_categories}"
 
-        personas = persona_registry.get_by_category(category)
-        result = [f"# 🎭 {category.title()} Personas\n"]
+        personas = list(persona_registry.get_by_category(category))
+        title = f"# 🎭 {category.title()} Personas"
     else:
-        personas = persona_registry.get_all().values()
-        result = [f"# 🎭 All Available Personas ({len(personas)} total)\n"]
+        personas = list(persona_registry.get_all().values())
+        title = f"# 🎭 All Available Personas ({len(personas)} total)"
 
+    result = [title + "\n"]
+
+    # Quick format - one-line tips
+    if format == "quick":
+        for persona in personas:
+            quick_tip = persona.quick_tip if hasattr(persona, 'quick_tip') and persona.quick_tip else persona.description
+            result.append(f"- **{persona.name}**: {quick_tip}\n")
+
+        result.append("\n**Tip:** Use `format=\"detailed\"` for more information.\n")
+        return "".join(result)
+
+    # Standard or detailed format
     for persona in personas:
-        result.append(f"\n## {persona.name.replace('-', ' ').title()}")
-        result.append(f"{persona.description}\n")
+        result.append(f"\n## {persona.name.replace('-', ' ').title()}\n")
+        result.append(f"{persona.description}\n\n")
+
+        # Expertise areas (both standard and detailed)
         if persona.expertise_areas:
             result.append(f"**Expertise:** {', '.join(persona.expertise_areas[:5])}\n")
 
-    result.append("\n---\n")
+        # Detailed format - add examples, use cases, and related personas
+        if format == "detailed":
+            # Example queries (v0.4.0 metadata)
+            if hasattr(persona, 'examples') and persona.examples:
+                result.append(f"\n**Example queries:**\n")
+                for example in persona.examples[:3]:  # Limit to 3 examples
+                    result.append(f'- "{example}"\n')
+
+            # When to use (v0.4.0 metadata)
+            if hasattr(persona, 'use_when') and persona.use_when:
+                result.append(f"\n**Use when:** {persona.use_when}\n")
+
+            # Related personas (v0.4.0 metadata)
+            if hasattr(persona, 'related_personas') and persona.related_personas:
+                result.append(f"\n**Works well with:** {', '.join(persona.related_personas)}\n")
+
+        result.append("\n")
+
+    # Footer
+    result.append("---\n")
+    if format == "standard":
+        result.append("**Tip:** Use `format=\"detailed\"` for examples and use cases, or `format=\"quick\"` for one-liners.\n\n")
     result.append("**Usage:** `consult_skill(skill_name=\"...\", query=\"...\")` or `get_engineering_guidance(specific_personas=[\"...\"])`\n")
 
     return "".join(result)
@@ -804,6 +1057,116 @@ def export_session_summary(
         include=include,
         max_consultations=max_consultations
     )
+
+
+# ============================================================================
+# v0.5.0 NEW TOOLS - Session Merge & Team Sync
+# ============================================================================
+
+# Initialize merger
+merger = SessionMerger()
+
+
+@mcp.tool()
+def merge_sessions(
+    session_ids: List[str],
+    target_session_id: str,
+    conflict_strategy: str = "latest",
+    project_root: str = None
+) -> str:
+    """
+    Merge multiple sessions into a single target session (v0.5.0).
+
+    Enables teams to combine session insights from multiple developers,
+    resolving conflicts and tracking attribution.
+
+    Args:
+        session_ids: List of session IDs to merge (e.g., ["dev1-session", "dev2-session"])
+        target_session_id: ID for the merged session (e.g., "team-session")
+        conflict_strategy: How to resolve conflicts:
+            - "latest" (default): Use most recent timestamp
+            - "oldest": Use oldest timestamp
+            - "all": Keep all variants (creates numbered versions)
+            - "manual": Return conflicts for manual resolution
+        project_root: Optional project root for local sessions
+
+    Returns:
+        Formatted merge result with statistics and conflicts
+
+    Examples:
+        # Merge two developer sessions
+        merge_sessions(
+            session_ids=["alice-frontend", "bob-backend"],
+            target_session_id="sprint-23",
+            conflict_strategy="latest"
+        )
+
+        # Merge with manual conflict resolution
+        merge_sessions(
+            session_ids=["team-a", "team-b"],
+            target_session_id="combined",
+            conflict_strategy="manual"
+        )
+
+        # Keep all decision variants
+        merge_sessions(
+            session_ids=["experiment-1", "experiment-2"],
+            target_session_id="final",
+            conflict_strategy="all"
+        )
+    """
+    result = merger.merge_sessions(
+        session_ids=session_ids,
+        target_session_id=target_session_id,
+        session_manager=session_mgr,
+        conflict_strategy=conflict_strategy,
+        project_root=project_root
+    )
+
+    return format_merge_result(result)
+
+
+@mcp.tool()
+def compare_sessions(
+    session_a_id: str,
+    session_b_id: str,
+    project_root: str = None
+) -> str:
+    """
+    Compare two sessions and return differences (v0.5.0).
+
+    Useful for understanding what decisions and patterns differ between
+    two developer sessions or team branches before merging.
+
+    Args:
+        session_a_id: First session ID
+        session_b_id: Second session ID
+        project_root: Optional project root for local sessions
+
+    Returns:
+        Formatted comparison showing unique and shared items
+
+    Examples:
+        # Compare two developer sessions
+        compare_sessions(
+            session_a_id="alice-session",
+            session_b_id="bob-session"
+        )
+
+        # Compare feature branches
+        compare_sessions(
+            session_a_id="feature-auth",
+            session_b_id="feature-payments"
+        )
+    """
+    comparison = merger.compare_sessions(
+        session_a_id=session_a_id,
+        session_b_id=session_b_id,
+        session_manager=session_mgr,
+        project_root=project_root
+    )
+
+    return format_comparison(comparison)
 
 
 if __name__ == "__main__":

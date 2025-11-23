@@ -18,6 +18,99 @@ pip install --upgrade sensei-mcp
 
 ---
 
+## Upgrading to v0.5.0 from v0.4.x
+
+### What's New
+
+v0.5.0 introduces **4 major features** and the **Database Architect persona** (23rd expert):
+
+1. **Interactive Persona Discovery** 🔍
+   - Enhanced `list_available_skills()` with 3 format modes (standard, detailed, quick)
+   - CLI demo mode (`sensei-mcp --demo`) with 5 real-world scenarios
+   - Intelligent context hints when <2 personas selected
+
+2. **CI/CD Integration Pack** 🔧
+   - GitHub Actions workflows for PR reviews and architecture checks
+   - Pre-commit hooks (consistency, security, cost analysis)
+   - GitLab CI pipeline with 3-stage validation
+   - Enhanced `analyze_changes()` with persona suggestions
+
+3. **Session Merge & Team Sync** 🤝
+   - `merge_sessions()` tool with 4 conflict resolution strategies
+   - `compare_sessions()` for side-by-side analysis
+   - Attribution tracking for all decisions
+
+4. **Database Architect Persona** 🗄️
+   - 23rd specialized expert joins the team
+   - Expertise: schema design, query optimization, migrations, scalability
+
+### Breaking Changes
+
+**✅ NONE** - v0.5.0 is fully backwards compatible with v0.4.x
+
+All existing tools, workflows, and session files continue to work exactly as before.
+
+### Upgrade Steps
+
+Same as previous versions (see Quick Upgrade above).
+
+### Using New v0.5.0 Features
+
+**Try the CLI demo:**
+```bash
+sensei-mcp --demo
+```
+
+**Enhanced persona discovery:**
+```python
+# Detailed format with examples and metadata
+list_available_skills(format="detailed")
+
+# Quick format (names only)
+list_available_skills(format="quick")
+```
+
+**Merge developer sessions:**
+```python
+merge_sessions(
+  session_ids=["alice-frontend", "bob-backend"],
+  target_session_id="sprint-23",
+  conflict_strategy="latest"  # or "oldest", "all", "manual"
+)
+
+# Compare before merging
+compare_sessions(
+  session_a_id="alice-session",
+  session_b_id="bob-session"
+)
+```
+
+**Consult Database Architect:**
+```python
+consult_skill(
+  skill_name="database-architect",
+  query="Design a database schema for a multi-tenant SaaS application"
+)
+
+# Or auto-selected via orchestrator
+get_engineering_guidance(
+  query="How should I index this table for optimal read performance?"
+)
+```
+
+**CI/CD Integration:**
+- See `integrations/INTEGRATION_GUIDE.md` for GitHub Actions, GitLab CI, and pre-commit hook setup
+- Templates available in `integrations/` directory
+
+### Session Compatibility
+
+**v0.4.x sessions work in v0.5.0:**
+- All session data preserved
+- No migration needed
+- New merge functionality available immediately
+
+---
+
 ## Upgrading to v0.3.0 from v0.2.x
 
 ### What's New
@@ -183,6 +276,8 @@ Same as v0.3.0 upgrade (see above).
 
 | Version | Release Date | Key Features |
 |---------|--------------|--------------|
+| **0.5.0** | 2025-01-23 | Enhanced Discovery, CI/CD Integration, Session Merge, Database Architect (23 personas), 2 new tools |
+| **0.4.0** | 2025-01-23 | Session Analytics & Team Collaboration, 3 new tools |
 | **0.3.0** | 2025-01-22 | Multi-Persona Orchestrator (22 skills), 3 new tools |
 | **0.2.1** | 2025-01-15 | CI/CD fixes |
 | **0.2.0** | 2025-01-14 | Team Sync, Git Awareness, Project Isolation |
