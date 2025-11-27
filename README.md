@@ -10,13 +10,23 @@
 
 **NEW in v0.8.0:** Complete Persona Portfolio (64 Personas) - All personas from claude-skills repository now integrated! Added 17 new personas including complete Design & UX team (6), Strategic Expansion skills (5), Critical Infrastructure gaps (5), and Meta-Navigation personas (2).
 
+**🌟 MCP Ecosystem Integration:** Sensei MCP is designed to work seamlessly with other MCP servers (Context7, Tavily, Playwright, GitHub, OpenMemory, Sequential Thinking) to create a comprehensive CTO co-pilot. See [MCP Integration Architecture](docs/MCP_INTEGRATION_ARCHITECTURE.md) for the complete vision.
+
 **v0.6.0:** Granular Persona Content Access (Option B Architecture) - Fixed orchestrator placeholder bug with new content-provider architecture. MCP now provides persona SKILL.md content for Claude to analyze, instead of trying to perform analysis itself. 4 new granular tools for persona discovery, content access, session context, and consultation recording.
 
-**v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona.
+**v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams.
 
 **v0.4.0:** Analytics & Team Collaboration - Track persona effectiveness, export session summaries as ADRs, and share engineering decisions with your team.
 
 Sensei transforms your engineering standards from passive documentation into an active mentor that injects relevant guidelines **before** Claude reasons, maintaining session memory of architectural decisions.
+
+### 🤝 Human-LLM Partnership (The Killer Insight)
+
+**Human provides:** Domain expertise, judgment, context, business constraints, strategic direction
+
+**LLM provides:** Synthesis across 64 expert personas, pattern matching against 32,000 lines of wisdom, consistency checking, real-time intelligence
+
+**Together:** CTO-level decisions at code-writing speed with multi-perspective analysis and no weak links
 
 ---
 
@@ -903,7 +913,16 @@ query_specific_standard(
 
 ## 📖 Documentation
 
+### Getting Started
 - **[Quick Start Guide](docs/QUICKSTART.md)** - 5-minute fast start
+- **[Usage Guide](docs/USAGE_GUIDE.md)** - Comprehensive usage examples
+
+### MCP Ecosystem Integration (NEW)
+- **[MCP Integration Architecture](docs/MCP_INTEGRATION_ARCHITECTURE.md)** - Complete vision for human-LLM partnership
+- **[MCP Integration Examples](docs/MCP_INTEGRATION_EXAMPLES.md)** - Real-world workflows combining multiple MCP servers
+- **[CI/CD Integration Guide](integrations/INTEGRATION_GUIDE.md)** - GitHub Actions, GitLab CI, pre-commit hooks
+
+### Technical Documentation
 - **[Architecture Deep Dive](docs/ARCHITECTURE.md)** - Technical implementation details
 - **[Contributing Guide](CONTRIBUTING.md)** - How to contribute
 - **[Publishing Guide](PUBLISHING.md)** - PyPI publishing workflow
