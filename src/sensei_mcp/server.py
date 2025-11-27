@@ -1434,6 +1434,230 @@ def compare_sessions(
     return format_comparison(comparison)
 
 
+# ============================================================================
+# v0.8.0 NEW TOOLS - Multi-MCP Orchestration
+# ============================================================================
+
+from .mcp_orchestrator import MCPOrchestrator
+from .demo_executor import DemoExecutor
+
+# Initialize MCP orchestrator
+mcp_orchestrator = MCPOrchestrator()
+
+# Initialize demo executor
+demo_executor = DemoExecutor(mcp_orchestrator)
+
+
+@mcp.tool()
+def suggest_mcps_for_query(
+    query: str,
+    context: str = "GENERAL",
+    user_mcps: List[str] = None
+) -> str:
+    """
+    Suggest which MCP servers to use for a given query.
+
+    Analyzes the query and recommends which MCP servers (Context7, Tavily,
+    Playwright, etc.) would be most helpful, along with pre-built workflow
+    templates if available.
+
+    Args:
+        query: The user's query
+        context: Detected query context (default: "GENERAL")
+                Options: SECURITY, COST, CRISIS, ARCHITECTURAL, TECHNICAL, etc.
+        user_mcps: Optional list of MCPs to filter suggestions
+                  (e.g., ["context7", "tavily"])
+
+    Returns:
+        JSON with suggested MCPs, rationale, matching workflows, and cost/time estimates
+
+    Example:
+        # Get MCP suggestions
+        suggest_mcps_for_query(
+            query="Review authentication for security issues",
+            context="SECURITY"
+        )
+
+        # Returns: sensei + context7 (OWASP docs) + tavily (CVEs) + playwright (live inspection)
+    """
+    result = mcp_orchestrator.suggest_mcps_for_query(
+        query=query,
+        context=context,
+        user_mcps=user_mcps
+    )
+
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def get_mcp_workflow_template(
+    template_name: str,
+    parameters: dict = None
+) -> str:
+    """
+    Get a pre-built multi-MCP workflow template.
+
+    Returns step-by-step workflow definitions for common scenarios,
+    with optional parameter substitution for customization.
+
+    Args:
+        template_name: Workflow template name
+            Available templates:
+            - "auth-security-review": Comprehensive auth security review
+            - "performance-debug": Performance debugging workflow
+            - "cost-optimization": Cloud cost analysis
+            - "tech-due-diligence": Technology evaluation
+            - "incident-postmortem": Incident analysis
+            - "accessibility-audit": WCAG compliance check
+            - "api-design-review": API design review
+
+        parameters: Optional dict of parameters to substitute
+            Example: {
+                "user_query": "Review FastAPI auth",
+                "app_url": "https://app.example.com",
+                "framework": "FastAPI"
+            }
+
+    Returns:
+        JSON with workflow steps, required MCPs, personas, and estimates
+
+    Example:
+        # Get auth security review workflow
+        get_mcp_workflow_template(
+            template_name="auth-security-review",
+            parameters={
+                "user_query": "Review authentication implementation",
+                "app_url": "https://app.example.com/login",
+                "framework": "FastAPI"
+            }
+        )
+    """
+    result = mcp_orchestrator.get_workflow_template(
+        template_name=template_name,
+        parameters=parameters or {}
+    )
+
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def list_mcp_workflow_templates() -> str:
+    """
+    List all available multi-MCP workflow templates.
+
+    Returns a summary of pre-built workflows with their descriptions,
+    required MCPs, cost estimates, and time estimates.
+
+    Returns:
+        JSON array of available workflow templates
+
+    Example:
+        # List all templates
+        list_mcp_workflow_templates()
+
+        # Returns: 7 templates (auth-security-review, performance-debug, etc.)
+    """
+    templates = mcp_orchestrator.list_workflow_templates()
+
+    return json.dumps(templates, indent=2)
+
+
+# ============================================================================
+# v0.8.0 NEW TOOLS - Executable Demo Workflows
+# ============================================================================
+
+@mcp.tool()
+def run_demo(
+    demo_type: str,
+    custom_params: dict = None,
+    output_format: str = "markdown"
+) -> str:
+    """
+    Execute a demonstration workflow that showcases multi-MCP orchestration.
+
+    Runs a self-contained demo that combines Sensei + external MCPs (Context7,
+    Tavily, Playwright) in realistic workflows. Perfect for:
+    - Testing multi-MCP coordination
+    - Generating example documentation
+    - Demonstrating Sensei capabilities
+    - Training and onboarding
+
+    Args:
+        demo_type: Type of demo to run
+            Available demos:
+            - "auth-review": Authentication security review (Sensei + Context7 + Tavily + Playwright)
+            - "performance-debug": Performance debugging (Sensei + Playwright + Context7)
+            - "cost-analysis": Cloud cost optimization (Sensei + Tavily)
+            - "api-review": API design review (Sensei + Context7 + Tavily)
+
+        custom_params: Optional custom parameters to override defaults
+            Example for auth-review: {
+                "user_query": "Review FastAPI authentication",
+                "app_url": "https://myapp.com/login",
+                "framework": "FastAPI"
+            }
+
+        output_format: Output format ("markdown", "json", "text")
+
+    Returns:
+        Comprehensive demo execution report showing:
+        - Workflow steps and MCP coordination
+        - Example findings from multi-MCP synthesis
+        - Expected output structure
+        - How to run the demo yourself
+
+    Examples:
+        # Run auth security review demo with defaults
+        run_demo(demo_type="auth-review")
+
+        # Run with custom parameters
+        run_demo(
+            demo_type="auth-review",
+            custom_params={
+                "user_query": "Review OAuth implementation",
+                "framework": "Django"
+            }
+        )
+
+        # Get JSON output
+        run_demo(demo_type="performance-debug", output_format="json")
+    """
+    result = demo_executor.run_demo(
+        demo_type=demo_type,
+        custom_params=custom_params,
+        output_format=output_format
+    )
+
+    # If there's an error, return it as plain text
+    if "error" in result:
+        return json.dumps(result, indent=2)
+
+    # Return formatted report
+    return result["formatted_report"]
+
+
+@mcp.tool()
+def list_demos() -> str:
+    """
+    List all available demonstration workflows.
+
+    Returns a summary of executable demos that showcase multi-MCP orchestration
+    capabilities.
+
+    Returns:
+        JSON array of available demos with descriptions and example parameters
+
+    Example:
+        # List all demos
+        list_demos()
+
+        # Returns: 4 demos (auth-review, performance-debug, cost-analysis, api-review)
+    """
+    demos = demo_executor.list_demos()
+
+    return json.dumps(demos, indent=2)
+
+
 if __name__ == "__main__":
     # Run the MCP server
     mcp.run()

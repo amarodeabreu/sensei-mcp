@@ -1,6 +1,6 @@
 [project]
 name = "sensei-mcp"
-version = "0.8.0"
+version = "0.9.0"
 description = "Multi-persona engineering mentor with 64 specialized AI personas orchestrating collaborative guidance, session memory, and git-aware context"
 authors = [{name = "amarodeabreu"}]
 readme = "README.md"

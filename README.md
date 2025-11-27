@@ -8,6 +8,8 @@
 
 > Multi-persona engineering mentor with 64 specialized AI personas orchestrating collaborative guidance
 
+**🚀 NEW in v0.9.0:** Complete Third-Party MCP Integration Suite - Multi-MCP orchestration with 6 integrated MCP servers (Serena, OpenMemory, GitHub, Context7, Tavily, Playwright), 13 workflow templates, and 10 executable demos! Tactical code execution (Sensei → Serena), cross-project memory (OpenMemory), and GitHub-integrated workflows (PR reviews, commit analysis, issue triage). See [Integration Guides](docs/integrations/README.md) for complete workflows.
+
 **NEW in v0.8.0:** Complete Persona Portfolio (64 Personas) - All personas from claude-skills repository now integrated! Added 17 new personas including complete Design & UX team (6), Strategic Expansion skills (5), Critical Infrastructure gaps (5), and Meta-Navigation personas (2).
 
 **🌟 MCP Ecosystem Integration:** Sensei MCP is designed to work seamlessly with other MCP servers (Context7, Tavily, Playwright, GitHub, OpenMemory, Sequential Thinking) to create a comprehensive CTO co-pilot. See [MCP Integration Architecture](docs/MCP_INTEGRATION_ARCHITECTURE.md) for the complete vision.
