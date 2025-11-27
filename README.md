@@ -6,9 +6,11 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-> Multi-persona engineering mentor with 47 specialized AI personas orchestrating collaborative guidance
+> Multi-persona engineering mentor with 64 specialized AI personas orchestrating collaborative guidance
 
-**NEW in v0.6.0:** Granular Persona Content Access (Option B Architecture) - Fixed orchestrator placeholder bug with new content-provider architecture. MCP now provides persona SKILL.md content for Claude to analyze, instead of trying to perform analysis itself. 4 new granular tools for persona discovery, content access, session context, and consultation recording.
+**NEW in v0.8.0:** Complete Persona Portfolio (64 Personas) - All personas from claude-skills repository now integrated! Added 17 new personas including complete Design & UX team (6), Strategic Expansion skills (5), Critical Infrastructure gaps (5), and Meta-Navigation personas (2).
+
+**v0.6.0:** Granular Persona Content Access (Option B Architecture) - Fixed orchestrator placeholder bug with new content-provider architecture. MCP now provides persona SKILL.md content for Claude to analyze, instead of trying to perform analysis itself. 4 new granular tools for persona discovery, content access, session context, and consultation recording.
 
 **v0.5.0:** Enhanced Discovery, CI/CD Integration, Team Collaboration & Database Expertise - Interactive demo mode, GitHub Actions/GitLab CI templates, session merging for teams, and the new Database Architect persona.
 
@@ -638,7 +640,7 @@ consult_skill(
 
 #### 12. list_available_skills
 
-Discover all 47 available personas organized by category.
+Discover all 64 available personas organized by category.
 
 ```python
 # List all personas (standard format)

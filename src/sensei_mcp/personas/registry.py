@@ -44,22 +44,26 @@ class PersonaRegistry:
     Provides lazy loading, caching, and categorization of personas.
     """
 
-    # Persona categories based on the skill-orchestrator (v0.7.0 - 47 personas)
+    # Persona categories based on claude-skills repository (v0.8.0 - 64 personas)
     CATEGORIES = {
         'core': ['snarky-senior-engineer', 'pragmatic-architect', 'legacy-archaeologist'],
         'specialized': [
-            'api-platform-engineer', 'data-engineer', 'database-architect',
-            'frontend-ux-specialist', 'ml-pragmatist', 'mobile-platform-engineer'
+            'api-platform-engineer', 'data-engineer',
+            'frontend-ux-specialist', 'ml-pragmatist', 'mobile-platform-engineer',
+            'backend-distributed-systems-engineer', 'enterprise-integration-architect',
+            'search-discovery-engineer'
         ],
         'operations': [
-            'site-reliability-engineer', 'incident-commander', 'observability-engineer'
+            'site-reliability-engineer', 'incident-commander', 'observability-engineer',
+            'devops-infrastructure-as-code', 'chaos-engineering-specialist'
         ],
-        'security': ['security-sentinel', 'compliance-guardian'],
+        'security': ['security-sentinel', 'compliance-guardian', 'privacy-engineer'],
         'platform': ['devex-champion', 'platform-builder', 'qa-automation-engineer'],
         'cost': ['finops-optimizer'],
         'leadership': [
             'empathetic-team-lead', 'product-engineering-lead',
-            'executive-liaison', 'technical-writer'
+            'executive-liaison', 'technical-writer',
+            'content-strategist-technical-marketing'
         ],
         'devrel': [
             'developer-advocate', 'solutions-architect', 'staff-ic-advisor',
@@ -84,7 +88,18 @@ class PersonaRegistry:
             'performance-engineer', 'cloud-architect', 'test-engineering-lead',
             'customer-success-engineer'
         ],
-        'meta': ['skill-orchestrator']
+        'design-ux': [
+            'ui-design-system-architect', 'product-designer',
+            'ux-research-strategist', 'visual-design-brand-specialist',
+            'interaction-design-specialist', 'motion-design-animator'
+        ],
+        'accessibility-localization': [
+            'accessibility-specialist', 'localization-i18n-engineer'
+        ],
+        'product-growth': [
+            'growth-engineer-product-analytics'
+        ],
+        'meta': ['skill-orchestrator', 'skill-matrix', 'skill-chains']
     }
 
     def __init__(self, skills_dir: Path):

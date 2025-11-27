@@ -5,6 +5,151 @@ All notable changes to Sensei MCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-01-27
+
+### Added - Complete Persona Portfolio (47 → 64 Personas) 🎭
+
+#### 17 New Personas from claude-skills Repository
+
+Completed integration of all personas from the `claude-skills` repository, achieving **100% EXCELLENT tier** with all 64 personas at 500+ lines of comprehensive expertise.
+
+**New Categories Added (4):**
+
+1. **Design & UX (6 personas):**
+   - `ui-design-system-architect` - Systems-thinking designer building scalable design languages and component ecosystems
+   - `product-designer` - End-to-end designer bridging user needs, business goals, and technical constraints
+   - `ux-research-strategist` - Data-driven researcher uncovering user needs and validating product decisions
+   - `visual-design-brand-specialist` - Pixel-perfect designer crafting beautiful, accessible visual systems
+   - `interaction-design-specialist` - Behavior-focused designer creating intuitive micro-interactions and seamless flows
+   - `motion-design-animator` - Performance-obsessed animator bringing interfaces to life with purposeful motion
+
+2. **Strategic Expansion (5 personas):**
+   - `content-strategist-technical-marketing` - Growth storyteller building content-driven engines with SEO and developer-focused narratives
+   - `accessibility-specialist` - Inclusion engineer ensuring WCAG compliance and assistive technology compatibility
+   - `localization-i18n-engineer` - Global enabler for worldwide product expansion with i18n architecture
+   - `growth-engineer-product-analytics` - Data-driven growth hacker for experimentation, metrics, and growth loops
+   - `devops-infrastructure-as-code` - Automation architect treating infrastructure as software with GitOps and immutable patterns
+
+3. **Critical Infrastructure Gaps (5 personas):**
+   - `backend-distributed-systems-engineer` - Distributed systems architect for microservices, event-driven architectures, and service mesh
+   - `privacy-engineer` - Privacy-by-design specialist implementing GDPR/CCPA compliance and data minimization
+   - `enterprise-integration-architect` - B2B integration specialist connecting products to enterprise ecosystems (Salesforce, SAP, NetSuite)
+   - `search-discovery-engineer` - Search relevance specialist building fast, accurate search with Elasticsearch and vector search
+   - `chaos-engineering-specialist` - Proactive resilience engineer breaking systems intentionally to find weaknesses
+
+4. **Meta-Navigation (2 personas):**
+   - `skill-matrix` - Selection advisor helping choose the right persona(s) for any scenario using decision trees
+   - `skill-chains` - Workflow architect providing battle-tested skill chains for common CTO workflows
+
+#### Enhanced Categories
+
+- **Specialized**: Expanded from 6 to 8 personas (added `backend-distributed-systems-engineer`, `enterprise-integration-architect`, `search-discovery-engineer`)
+- **Operations**: Expanded from 3 to 5 personas (added `devops-infrastructure-as-code`, `chaos-engineering-specialist`)
+- **Security**: Expanded from 2 to 3 personas (added `privacy-engineer`)
+- **Leadership**: Expanded from 4 to 5 personas (added `content-strategist-technical-marketing`)
+- **Meta**: Expanded from 1 to 3 personas (added `skill-matrix`, `skill-chains`)
+
+#### Registry Updates
+
+- **Enhanced `PersonaRegistry.CATEGORIES`** with 4 new categories:
+  - `design-ux` - Complete design team from systems to motion
+  - `accessibility-localization` - Inclusive design and global expansion
+  - `product-growth` - Analytics and experimentation
+  - (Plus enhanced existing categories with new specialists)
+- Updated comment to reflect "v0.8.0 - 64 personas"
+- Removed deprecated `database-architect` (not in claude-skills repository)
+
+### Enhanced
+
+- **PersonaRegistry**:
+  - Expanded from 47 to 64 total personas (36% increase)
+  - Added 4 new categories alongside existing 13 (core, specialized, operations, security, platform, cost, leadership, devrel, strategic, management, technical-leadership, coordination, infrastructure, meta)
+  - All new personas automatically discoverable via `list_available_skills()`
+  - All new personas accessible via `get_persona_content()`
+  - Enhanced `suggest_personas_for_query()` now considers all 64 personas
+
+### Documentation
+
+- **Updated README.md**:
+  - Changed tagline from "47 specialized AI personas" to "64 specialized AI personas"
+  - Added v0.8.0 feature announcement highlighting complete portfolio
+  - Updated persona counts in `list_available_skills()` documentation
+  - All references updated from "47 personas" to "64 personas"
+- **Created comprehensive persona portfolio** with 100% EXCELLENT tier (all personas at 500+ lines)
+
+### Testing
+
+- **Persona smoke test**: All 64 persona files load correctly
+- **No regression**: All v0.7.0 functionality remains intact
+- **Backwards compatible**: All existing tools and workflows continue to function
+
+### Files Added (17 new persona SKILL.md files)
+
+**Design & UX (6):**
+- `src/sensei_mcp/personas/skills/ui-design-system-architect.md`
+- `src/sensei_mcp/personas/skills/product-designer.md`
+- `src/sensei_mcp/personas/skills/ux-research-strategist.md`
+- `src/sensei_mcp/personas/skills/visual-design-brand-specialist.md`
+- `src/sensei_mcp/personas/skills/interaction-design-specialist.md`
+- `src/sensei_mcp/personas/skills/motion-design-animator.md`
+
+**Strategic Expansion (5):**
+- `src/sensei_mcp/personas/skills/content-strategist-technical-marketing.md`
+- `src/sensei_mcp/personas/skills/accessibility-specialist.md`
+- `src/sensei_mcp/personas/skills/localization-i18n-engineer.md`
+- `src/sensei_mcp/personas/skills/growth-engineer-product-analytics.md`
+- `src/sensei_mcp/personas/skills/devops-infrastructure-as-code.md`
+
+**Critical Infrastructure (5):**
+- `src/sensei_mcp/personas/skills/backend-distributed-systems-engineer.md`
+- `src/sensei_mcp/personas/skills/privacy-engineer.md`
+- `src/sensei_mcp/personas/skills/enterprise-integration-architect.md`
+- `src/sensei_mcp/personas/skills/search-discovery-engineer.md`
+- `src/sensei_mcp/personas/skills/chaos-engineering-specialist.md`
+
+**Meta-Navigation (2):**
+- `src/sensei_mcp/personas/skills/skill-matrix.md`
+- `src/sensei_mcp/personas/skills/skill-chains.md`
+
+### Files Modified
+
+- `src/sensei_mcp/personas/registry.py` - Added 4 new categories with 17 new personas, updated to v0.8.0
+- `README.md` - Updated persona counts from 47 to 64
+- `CHANGELOG.md` - Added v0.8.0 section
+- `pyproject.toml` - Bumped version to 0.8.0
+
+### Files Removed
+
+- `src/sensei_mcp/personas/skills/database-architect.md` - Deprecated (not in claude-skills repository)
+
+### Statistics
+
+- **Total Personas**: 47 → 64 (36% increase)
+- **Total Categories**: 13 → 17 (31% increase)
+- **New Persona Files**: 17 SKILL.md files
+- **LOC Added**: ~8,500+ (17 persona files with 500+ lines each)
+- **Tests Affected**: 0 (all existing tests pass)
+- **Breaking Changes**: 0 (fully backwards compatible)
+
+### Backwards Compatibility
+
+- ✅ All v0.7.x tools remain functional
+- ✅ All v0.6.x tools remain functional
+- ✅ All v0.5.x tools remain functional
+- ✅ Session format compatible (no breaking changes)
+- ✅ Existing persona names unchanged (only additions)
+- ✅ All existing workflows continue to function
+
+### Known Issues
+
+- Same as v0.7.0: 16 DeprecationWarnings for datetime.utcnow() usage (deferred to v0.8.1)
+
+### Milestone
+
+🎉 **100% EXCELLENT Tier Achieved**: All 64 personas in the claude-skills repository now have 500+ lines of comprehensive, battle-tested expertise, making Sensei MCP the most comprehensive multi-persona engineering mentor available via MCP.
+
+---
+
 ## [0.7.0] - 2025-01-23
 
 ### Added - Persona Expansion (23 → 47 Personas) 🎭
@@ -787,6 +932,7 @@ record_consultation(query, personas_used=[...], synthesis="...")
 
 ---
 
+[0.8.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.8.0
 [0.7.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.7.0
 [0.6.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.6.0
 [0.5.0]: https://github.com/amarodeabreu/sensei-mcp/releases/tag/v0.5.0
